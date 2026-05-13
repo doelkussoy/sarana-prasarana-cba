@@ -12,7 +12,7 @@ if (isset($_POST['login'])) {
 
     if (mysqli_num_rows($result) > 0) {
         $userData = mysqli_fetch_assoc($result);
-        
+
         // Verifikasi password (Mendukung hash baru)
         if (password_verify($password, $userData["pass"])) {
             $_SESSION["username"] = $username;
@@ -29,10 +29,12 @@ if (isset($_POST['login'])) {
                 header('Location: dashboard.php');
                 exit;
             }
-            echo "<script>alert('Username atau Password Salah!'); window.location.href='index.php'</script>";
+            header('Location: index.php?error=login_failed');
+            exit;
         }
     } else {
-        echo "<script>alert('Username atau Password Salah!'); window.location.href='index.php'</script>";
+        header('Location: index.php?error=login_failed');
+        exit;
     }
 }
 ?>

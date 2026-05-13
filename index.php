@@ -196,6 +196,7 @@
     <footer>&copy; <?php echo date('Y'); ?> - Sistem Sarana Prasarana &nbsp;|&nbsp; Team IT Pabrik
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -208,6 +209,26 @@
             });
         }
     </script>
+
+    <?php if (isset($_GET['error']) && $_GET['error'] == 'login_failed'): ?>
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Gagal!',
+                text: 'Username atau Password yang Anda masukkan salah.',
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: '<i class="fa-solid fa-rotate-right me-2"></i>Coba Lagi',
+                background: '#ffffff',
+                customClass: {
+                    title: 'text-danger',
+                    confirmButton: 'btn btn-primary px-4 py-2 rounded-pill'
+                }
+            }).then((result) => {
+                // Hapus parameter error dari URL setelah pop up ditutup
+                window.history.replaceState(null, null, window.location.pathname);
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

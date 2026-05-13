@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: May 11, 2026 at 08:33 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost
+-- Generation Time: May 13, 2026 at 09:18 AM
+-- Server version: 10.11.10-MariaDB-log
+-- PHP Version: 8.2.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -219,12 +219,9 @@ CREATE TABLE `checklist_grease_trap` (
 --
 
 INSERT INTO `checklist_grease_trap` (`id`, `grease_trap_id`, `tahun`, `bulan`, `minggu`, `tanggal_cek`, `kondisi_fisik`, `kebersihan_internal`, `pemisahan_lemak`, `saluran_in_out`, `bau_kontaminasi`, `paraf`, `catatan`, `users_id`, `foto`, `created_at`) VALUES
-(1, 1, 2026, 2, 4, '2026-03-19', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:15:15'),
-(2, 1, 2026, 9, 2, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:15:48'),
-(3, 1, 2026, 2, 1, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:16:13'),
-(4, 1, 2026, 2, 2, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:16:25'),
-(5, 1, 2026, 2, 3, '2026-05-05', 'Nok', 'Nok', 'Nok', 'Nok', 'Nok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:16:35'),
-(6, 1, 2026, 1, 1, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'tidak ada petunjuk', 1, NULL, '2026-05-05 10:18:41');
+(8, 1, 2026, 5, 1, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'jhbj', 'gfdg', 1, 'GT_1_2026_5_1_1778572142.png', '2026-05-12 14:49:03'),
+(9, 1, 2026, 5, 2, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'tes', 'ghhh', 1, 'GT_1_2026_5_2_1778580191.PNG', '2026-05-12 17:02:41'),
+(10, 1, 2026, 1, 1, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 2, 'GT_1_2026_1_1_1778580261.png', '2026-05-12 17:04:22');
 
 -- --------------------------------------------------------
 
@@ -257,9 +254,9 @@ CREATE TABLE `checklist_hydrant` (
 --
 
 INSERT INTO `checklist_hydrant` (`id`, `hydrant_id`, `tahun`, `bulan`, `tanggal_cek`, `valve_handle`, `hose_coupling_conect`, `baut_valve_handle`, `fire_hose`, `slang_hydrant`, `nozzle`, `box_hydrant`, `paraf`, `catatan`, `users_id`, `foto`, `created_at`) VALUES
-(1, 1, 2026, 4, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 1, NULL, '2026-05-05 10:17:58'),
-(2, 1, 2026, 1, '2026-05-11', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'dasda', 2, 'HYDRANT_1_2026_1_1778480871.png', '2026-05-11 13:27:51'),
-(3, 1, 2026, 2, '2026-05-11', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'jgj', 'hjgh', 2, 'HYDRANT_1_2026_2_1778481139.png', '2026-05-11 13:32:21');
+(6, 1, 2026, 5, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Kurang rapat ', 1, 'HYDRANT_1_2026_5_1778573070.png', '2026-05-12 13:58:03'),
+(7, 1, 2026, 6, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Andi', 'Kuran rapat ', 2, 'HYDRANT_1_2026_6_1778573311.jpg', '2026-05-12 15:08:31'),
+(8, 1, 2026, 4, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Andi', 'Yyy', 1, 'HYDRANT_1_2026_4_1778574202.jpg', '2026-05-12 15:23:22');
 
 -- --------------------------------------------------------
 
@@ -478,7 +475,7 @@ ALTER TABLE `apar`
 -- AUTO_INCREMENT for table `checklist_apar`
 --
 ALTER TABLE `checklist_apar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `checklist_gedung`
@@ -490,13 +487,13 @@ ALTER TABLE `checklist_gedung`
 -- AUTO_INCREMENT for table `checklist_grease_trap`
 --
 ALTER TABLE `checklist_grease_trap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `checklist_hydrant`
 --
 ALTER TABLE `checklist_hydrant`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `gedung`

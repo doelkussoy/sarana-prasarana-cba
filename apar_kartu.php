@@ -697,7 +697,13 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
   <script>
     var existingData = <?= json_encode($rows) ?>;
     var items = <?= json_encode(array_keys($items)) ?>;
-    var isAdmin = <?= ($_SESSION['role'] ?? '') === 'Admin' ? 'true' : 'false' ?>;
+    var isAdmin = <?php echo ($_SESSION['role'] ?? '') === 'Admin' ? 'true' : 'false'; ?>;
+    // Restrict ordinary users to today and future dates
+    if (!isAdmin) {
+      var today = new Date().toISOString().split('T')[0];
+      var dateInput = document.getElementById('inputTgl');
+      if (dateInput) dateInput.setAttribute('min', today);
+    }
     var entityId = <?= $apar_id ?>;
     var tahun = <?= $tahun ?>;
     var entityParam = 'apar_id';
@@ -746,6 +752,21 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     }
 
     function bukaEdit(bulan) {
+      // Prevent normal users from editing past dates
+      if (!isAdmin) {
+        var selectedDate = new Date(tahun, bulan - 1, bulan);
+        var today = new Date();
+        today.setHours(0,0,0,0);
+        if (selectedDate < today) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Akses Dibatasi',
+            text: 'User biasa hanya dapat mengisi/mengubah data untuk hari ini dan kedepan.',
+            confirmButtonColor: '#2563eb'
+          });
+          return;
+        }
+      }
       var modal = document.getElementById('modalIsian');
       modal.classList.add('active');
       document.getElementById('editBulan').value = bulan;

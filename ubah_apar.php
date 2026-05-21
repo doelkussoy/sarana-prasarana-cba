@@ -6,11 +6,12 @@ include "login_session.php";
 if (isset($_POST['ubah_apar'])) {
     
     if (isset($_GET['id'])) {
+        $id = mysqli_real_escape_string($conn, $_GET['id']);
         $apar_id = $_POST['apar_id'];
         $lokasi = $_POST['lokasi'];
         $keterangan = $_POST['keterangan'];
     
-        $query = "UPDATE apar_data SET id = '$apar_id', lokasi = '$lokasi', keterangan = '$keterangan'  WHERE id = '$_GET[id]'";
+        $query = "UPDATE apar_data SET id = '$apar_id', lokasi = '$lokasi', keterangan = '$keterangan'  WHERE id = '$id'";
         $result = mysqli_query($conn, $query);
 
         if ($result) {
@@ -27,8 +28,8 @@ $lokasi = "";
 $keterangan = "";
 
 if (isset($_GET['id'])) {
-
-    $result = mysqli_query($conn, "SELECT * FROM apar_data WHERE id = '$_GET[id]'");
+    $id = mysqli_real_escape_string($conn, $_GET['id']);
+    $result = mysqli_query($conn, "SELECT * FROM apar_data WHERE id = '$id'");
     $row = mysqli_fetch_array($result);
         
     if ($row) {
@@ -85,6 +86,7 @@ $conn->close();
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="assets/images/cba.png">
+    <link rel="icon" type="image/png" href="assets/images/cba.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>

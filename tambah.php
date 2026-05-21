@@ -7,15 +7,15 @@ if (isset($_POST['tambah_checklist'])) {
 
     date_default_timezone_set('Asia/Jakarta');
 
-    $apar_id = $_POST['apar_id'];
-    $kloset = $_POST['kloset'];
-    $wastafel = $_POST['wastafel'];
-    $lantai = $_POST['lantai'];
-    $dinding = $_POST['dinding'];
-    $kaca = $_POST['kaca'];
-    $bau = $_POST['bau'];
-    $sabun = $_POST['sabun'];
-    $users_id = $_POST['users_id'];
+    $apar_id = mysqli_real_escape_string($conn, $_POST['apar_id']);
+    $kloset = mysqli_real_escape_string($conn, $_POST['kloset']);
+    $wastafel = mysqli_real_escape_string($conn, $_POST['wastafel']);
+    $lantai = mysqli_real_escape_string($conn, $_POST['lantai']);
+    $dinding = mysqli_real_escape_string($conn, $_POST['dinding']);
+    $kaca = mysqli_real_escape_string($conn, $_POST['kaca']);
+    $bau = mysqli_real_escape_string($conn, $_POST['bau']);
+    $sabun = mysqli_real_escape_string($conn, $_POST['sabun']);
+    $users_id = mysqli_real_escape_string($conn, $_POST['users_id']);
 
     $query = "INSERT INTO checklist (tanggal, apar_id, kloset, wastafel, lantai, dinding, kaca, bau,
     sabun, users_id) VALUES (NOW(), '$apar_id', '$kloset', '$wastafel', '$lantai', '$dinding', '$kaca', '$bau', '$sabun', '$users_id')";
@@ -32,15 +32,17 @@ elseif (isset($_POST['tambah_akun'])) {
         echo "<script>alert('Akses Ditolak! Hanya Admin yang memiliki otoritas untuk menambah akun.'); window.history.back();</script>";
         exit;
     }
-    $username = $_POST['username'];
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
     $pass = $_POST['password'];
-    $nama = $_POST['nama'];
-    $email = $_POST['email'];
-    $status = $_POST['status'];
-    $role = $_POST['role'];
+    $nama = mysqli_real_escape_string($conn, $_POST['nama']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $status = mysqli_real_escape_string($conn, $_POST['status']);
+    $role = mysqli_real_escape_string($conn, $_POST['role']);
+
+    $hashedPassword = password_hash($pass, PASSWORD_DEFAULT);
 
     $query = "INSERT INTO users (username, pass, nama, email, status, role)
-              VALUES ('$username', '$pass', '$nama', '$email', '$status', '$role')";
+              VALUES ('$username', '$hashedPassword', '$nama', '$email', '$status', '$role')";
     $result = mysqli_query($conn, $query);
 
     if ($result) {
@@ -55,9 +57,9 @@ elseif (isset($_POST['tambah_apar'])) {
         echo "<script>alert('Akses Ditolak! Hanya Admin yang memiliki otoritas untuk menambah data APAR.'); window.history.back();</script>";
         exit;
     }
-    $apar_id = $_POST['apar_id'];
-    $lokasi = $_POST['lokasi'];
-    $keterangan = $_POST['keterangan'];
+    $apar_id = mysqli_real_escape_string($conn, $_POST['apar_id']);
+    $lokasi = mysqli_real_escape_string($conn, $_POST['lokasi']);
+    $keterangan = mysqli_real_escape_string($conn, $_POST['keterangan']);
 
     $query = "INSERT INTO apar_data (id, lokasi, keterangan)
               VALUES ('$apar_id', '$lokasi', '$keterangan')";
@@ -94,6 +96,7 @@ $conn->close();
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="assets/images/cba.png">
+    <link rel="icon" type="image/png" href="assets/images/cba.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>

@@ -6,6 +6,7 @@ include "login_session.php";
 if (isset($_POST['ubah_checklist'])) {
     
     if (isset($_GET['id'])) {
+        $id = mysqli_real_escape_string($conn, $_GET['id']);
         $tanggal = $_POST['tanggal'];
         $users_id = $_POST['users_id'];
         $apar_id = $_POST['apar_id'];
@@ -17,7 +18,7 @@ if (isset($_POST['ubah_checklist'])) {
         $bau = $_POST['bau'];
         $sabun = $_POST['sabun'];
     
-        $query = "UPDATE checklist SET tanggal = '$tanggal', users_id = '$users_id', apar_id = '$apar_id', kloset = '$kloset', wastafel = '$wastafel', lantai = '$lantai', dinding = '$dinding', kaca = '$kaca', bau = '$bau', sabun = '$sabun' WHERE id = '$_GET[id]'";
+        $query = "UPDATE checklist SET tanggal = '$tanggal', users_id = '$users_id', apar_id = '$apar_id', kloset = '$kloset', wastafel = '$wastafel', lantai = '$lantai', dinding = '$dinding', kaca = '$kaca', bau = '$bau', sabun = '$sabun' WHERE id = '$id'";
         $result = mysqli_query($conn, $query);
 
         if ($result) {
@@ -41,8 +42,8 @@ $sabun = "";
 $tanggal = "";
 
 if (isset($_GET['id'])) {
-
-    $result = mysqli_query($conn, "SELECT * FROM checklist WHERE id = '$_GET[id]'");
+    $id = mysqli_real_escape_string($conn, $_GET['id']);
+    $result = mysqli_query($conn, "SELECT * FROM checklist WHERE id = '$id'");
     $row = mysqli_fetch_array($result);
         
     if ($row) {
@@ -106,6 +107,7 @@ $conn->close();
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="assets/images/cba.png">
+    <link rel="icon" type="image/png" href="assets/images/cba.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>

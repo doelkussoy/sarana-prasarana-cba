@@ -48,6 +48,7 @@ include "login_session.php";
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e3a8a">
     <link rel="apple-touch-icon" href="assets/images/cba.png">
+    <link rel="icon" type="image/png" href="assets/images/cba.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>

@@ -54,21 +54,32 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manajemen User - Sistem Sarana Prasarana</title>
+  <link rel="icon" type="image/png" href="assets/images/cba.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     :root {
-      --blue: #0d6efd;
-      --blue-dark: #0a58ca;
-      --blue-light: #e7f1ff;
+      --blue: #2563eb;
+      --blue-dark: #1e3a8a;
+      --blue-light: #3b82f6;
     }
-    body { background: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     .navbar { background: linear-gradient(135deg, var(--blue-dark), var(--blue-light)); }
-    .card { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    .table thead { background: #f1f5f9; }
-    .btn-primary { background: var(--blue-dark); border: none; }
-    .btn-primary:hover { background: var(--blue); }
+    .card { border: none; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+    .table thead { background: #f8fafc; }
+    .table th { font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; color: #64748b; padding: 12px 16px; }
+    .table td { padding: 16px; }
+    .btn-primary { background: var(--blue-dark); border: none; transition: all 0.2s; }
+    .btn-primary:hover { background: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+    .btn-outline-secondary { border-color: #cbd5e1; color: #475569; }
+    .btn-outline-secondary:hover { background-color: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
+    
+    @media (max-width: 576px) {
+      .navbar-brand span { font-size: 16px !important; }
+      .card { padding: 20px !important; }
+      .container { margin-top: 90px !important; }
+    }
   </style>
 
     <link rel="manifest" href="manifest.json">
@@ -84,36 +95,45 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
         <img src="assets/images/cba.png" alt="Logo CBA" style="height:40px; background:white; padding:4px; border-radius:8px;">
         <span class="fw-bold fs-5" style="letter-spacing:1px">MANAJEMEN USER</span>
       </div>
-      <a href="dashboard.php" class="btn btn-sm btn-outline-light rounded-pill px-3">
-        <i class="fa-solid fa-arrow-left me-1"></i>Kembali
-      </a>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-white small d-none d-sm-inline"><i class="fa-solid fa-user me-1"></i><?= htmlspecialchars($_SESSION['username']) ?></span>
+      </div>
     </div>
   </nav>
 
-  <div class="container" style="margin-top:100px; padding-bottom:40px;">
+  <div class="container" style="margin-top:110px; padding-bottom:40px;">
+    <!-- Row Header dengan tombol Kembali -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+      <a href="dashboard.php" class="btn btn-sm btn-outline-secondary rounded-pill bg-white px-3 shadow-sm d-flex align-items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> <span>Kembali ke Dashboard</span>
+      </a>
+    </div>
+
     <div class="row">
       <!-- Form Tambah User -->
       <div class="col-lg-4 mb-4">
         <div class="card p-4">
-          <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-user-plus me-2"></i>Tambah User Baru</h5>
-          <hr>
+          <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-plus"></i> Tambah User Baru
+          </h5>
+          <hr class="text-muted opacity-25">
           <form method="POST">
             <div class="mb-3">
-              <label class="form-label fw-semibold">Username</label>
-              <input type="text" name="username" class="form-control" placeholder="Masukkan username" required>
+              <label class="form-label fw-semibold text-secondary small">Username</label>
+              <input type="text" name="username" class="form-control form-control-md rounded-3" placeholder="Masukkan username" required>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-semibold">Password</label>
-              <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+              <label class="form-label fw-semibold text-secondary small">Password</label>
+              <input type="password" name="password" class="form-control form-control-md rounded-3" placeholder="Masukkan password" required>
             </div>
             <div class="mb-4">
-              <label class="form-label fw-semibold">Role / Hak Akses</label>
-              <select name="role" class="form-select" required>
+              <label class="form-label fw-semibold text-secondary small">Role / Hak Akses</label>
+              <select name="role" class="form-select form-select-md rounded-3" required>
                 <option value="User">User (Input Saja)</option>
                 <option value="Admin">Admin (Full Akses)</option>
               </select>
             </div>
-            <button type="submit" name="tambah_user" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+            <button type="submit" name="tambah_user" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm rounded-3">
               <i class="fa-solid fa-save me-1"></i>Simpan User
             </button>
           </form>
@@ -121,36 +141,39 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
       </div>
 
       <!-- Daftar User -->
-      <div class="col-lg-8">
+      <div class="col-lg-8 mb-4">
         <div class="card p-4">
-          <h5 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-users me-2"></i>Daftar Pengguna Sistem</h5>
+          <h5 class="fw-bold mb-3 text-primary d-flex align-items-center gap-2">
+            <i class="fa-solid fa-users"></i> Daftar Pengguna Sistem
+          </h5>
+          <hr class="text-muted opacity-25">
           <div class="table-responsive">
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle mb-0">
               <thead>
                 <tr>
-                  <th>No</th>
+                  <th style="width: 60px;">No</th>
                   <th>Username</th>
                   <th>Role</th>
-                  <th class="text-center">Aksi</th>
+                  <th class="text-center" style="width: 120px;">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <?php $no = 1; while ($u = mysqli_fetch_assoc($listUsers)): ?>
                 <tr>
                   <td><?= $no++ ?></td>
-                  <td class="fw-bold"><?= htmlspecialchars($u['username']) ?></td>
+                  <td class="fw-bold text-dark"><?= htmlspecialchars($u['username']) ?></td>
                   <td>
-                    <span class="badge <?= $u['role'] == 'Admin' ? 'bg-primary' : 'bg-secondary' ?> rounded-pill px-3">
+                    <span class="badge <?= $u['role'] == 'Admin' ? 'bg-primary' : 'bg-secondary' ?> rounded-pill px-3 py-1.5">
                       <?= $u['role'] ?>
                     </span>
                   </td>
                   <td class="text-center">
                     <?php if ($u['id'] != $_SESSION['id']): ?>
-                    <button class="btn btn-sm btn-outline-danger border-0" onclick="confirmDelete(<?= $u['id'] ?>)">
+                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" style="width: 32px; height: 32px; padding: 0;" onclick="confirmDelete(<?= $u['id'] ?>)" title="Hapus User">
                       <i class="fa-solid fa-trash"></i>
                     </button>
                     <?php else: ?>
-                    <small class="text-muted italic">Akun Anda</small>
+                    <span class="badge bg-light text-muted border px-3 py-1.5">Akun Anda</span>
                     <?php endif; ?>
                   </td>
                 </tr>

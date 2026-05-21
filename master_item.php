@@ -130,6 +130,25 @@ if (isset($_GET['hapus'])) {
   exit;
 }
 
+// Handle Edit Item
+if (isset($_POST['edit_item'])) {
+  $id = (int)$_POST['id_item'];
+  $label = mysqli_real_escape_string($conn, $_POST['label']);
+  $modul = mysqli_real_escape_string($conn, $_POST['modul']);
+  
+  // check if label matches another item in same modul (excluding itself)
+  $kolom = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', trim($label)));
+  $cekKolom = mysqli_query($conn, "SELECT id FROM master_item WHERE modul='$modul' AND kolom='$kolom' AND id != $id AND is_active=1");
+  if (mysqli_num_rows($cekKolom) > 0) {
+    header("Location: master_item.php?modul=$modul&error=duplikat");
+    exit;
+  }
+  
+  mysqli_query($conn, "UPDATE master_item SET label='$label' WHERE id=$id");
+  header("Location: master_item.php?modul=$modul&pesan=edit_sukses");
+  exit;
+}
+
 // Ambil data
 $modulFilter = isset($_GET['modul']) ? mysqli_real_escape_string($conn, $_GET['modul']) : 'apar';
 $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilter' AND is_active=1 ORDER BY id ASC");
@@ -228,6 +247,9 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
                   <td><?= $no++ ?></td>
                   <td class="fw-semibold"><?= htmlspecialchars($row['label']) ?></td>
                   <td>
+                    <button type="button" class="btn btn-warning btn-sm text-white" onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['label'])) ?>', '<?= htmlspecialchars($row['modul']) ?>')" title="Edit Nama Item">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['id'] ?>)" title="Hapus (Sembunyikan)">
                       <i class="fa-solid fa-trash"></i>
                     </button>
@@ -280,8 +302,41 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
     </div>
   </div>
 
+  <!-- Modal Edit Item -->
+  <div class="modal fade" id="modalEdit" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="border-radius:16px; border:none;">
+        <div class="modal-header border-bottom-0 pb-0">
+          <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Item Pengecekan</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form method="POST">
+          <input type="hidden" name="id_item" id="edit_id">
+          <input type="hidden" name="modul" id="edit_modul">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Nama Item Pengecekan</label>
+              <input type="text" class="form-control" name="label" id="edit_label" required>
+            </div>
+          </div>
+          <div class="modal-footer border-top-0 pt-0">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" name="edit_item" class="btn btn-primary rounded-pill px-4">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    function openEditModal(id, label, modul) {
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_label').value = label;
+      document.getElementById('edit_modul').value = modul;
+      new bootstrap.Modal(document.getElementById('modalEdit')).show();
+    }
+
     function confirmDelete(id) {
       Swal.fire({
         title: 'Hapus Item?',
@@ -301,6 +356,9 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
 
     <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'tambah_sukses'): ?>
       Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Item baru ditambahkan', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+    <?php endif; ?>
+    <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'edit_sukses'): ?>
+      Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Item berhasil diubah', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
     <?php endif; ?>
     <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'hapus_sukses'): ?>
       Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Item berhasil disembunyikan', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });

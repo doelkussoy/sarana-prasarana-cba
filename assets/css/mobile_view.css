@@ -46,8 +46,7 @@
     }
 
     .form-tambah input,
-    .form-tambah .id-label,
-    .form-tambah .toilet-label {
+    .form-tambah .id-label {
         margin-bottom: 16px !important;
     }
 

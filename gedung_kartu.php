@@ -17,11 +17,29 @@ if (!$gedungRow) {
   exit;
 }
 
+// Ambil daftar item dari master_item
+$items = [];
+$fields = [];
+$resItems = mysqli_query($conn, "SELECT kolom, label FROM master_item WHERE modul='gedung' AND is_active=1 ORDER BY id ASC");
+if(mysqli_num_rows($resItems) == 0) {
+    // Fallback seed (jika master_item belum pernah dibuka sama sekali)
+    $defaultGedung = ['dinding' => 'Dinding','atap_talang' => 'Atap/Talang','lantai' => 'Lantai','wastafel' => 'Wastafel','pintu_kaca' => 'Pintu/Kaca','toilet' => 'Toilet','lain_lain' => 'Lain-lain'];
+    foreach($defaultGedung as $k => $l) {
+        mysqli_query($conn, "INSERT IGNORE INTO master_item (modul, kolom, label, is_active) VALUES ('gedung', '$k', '$l', 1)");
+        $items[$k] = $l;
+        $fields[] = $k;
+    }
+} else {
+    while ($rItem = mysqli_fetch_assoc($resItems)) {
+        $items[$rItem['kolom']] = $rItem['label'];
+        $fields[] = $rItem['kolom'];
+    }
+}
+
 // Handle simpan perawatan
 if (isset($_POST['simpan_checklist'])) {
   $bulan = (int) $_POST['bulan'];
   $tgl = mysqli_real_escape_string($conn, $_POST['tanggal_cek']);
-  $fields = ['dinding', 'atap_talang', 'lantai', 'wastafel', 'pintu_kaca', 'toilet', 'lain_lain'];
   $vals = [];
   foreach ($fields as $f) {
     $vals[$f] = isset($_POST[$f]) ? mysqli_real_escape_string($conn, $_POST[$f]) : null;
@@ -33,16 +51,25 @@ if (isset($_POST['simpan_checklist'])) {
   // Handle Upload Foto
   $foto_name = null;
   $cekLama = mysqli_fetch_assoc(mysqli_query($conn, "SELECT foto FROM checklist_gedung WHERE gedung_id=$gedung_id AND tahun=$tahun AND bulan=$bulan"));
-  if ($cekLama) $foto_name = $cekLama['foto'];
+  if ($cekLama)
+    $foto_name = $cekLama['foto'];
 
   if (isset($_FILES['foto']) && $_FILES['foto']['error'] == 0) {
     $target_dir = "uploads/";
     $ext = pathinfo($_FILES["foto"]["name"], PATHINFO_EXTENSION);
-    if (empty($ext)) { $ext = "jpg"; }
+    if (empty($ext)) {
+      $ext = "jpg";
+    }
     $new_name = "GEDUNG_" . $gedung_id . "_" . $tahun . "_" . $bulan . "_" . time() . "." . $ext;
     if (compressImage($_FILES["foto"]["tmp_name"], $target_dir . $new_name)) {
-        $foto_name = $new_name;
+      $foto_name = $new_name;
     }
+  }
+
+  // Validasi: foto wajib ada (baru atau lama)
+  if (!$foto_name) {
+    header("Location: gedung_kartu.php?gedung_id=$gedung_id&tahun=$tahun&error=foto_wajib");
+    exit;
   }
 
   // Cek sudah ada?
@@ -60,16 +87,18 @@ if (isset($_POST['simpan_checklist'])) {
     $set = implode(',', $setArr);
     mysqli_query($conn, "UPDATE checklist_gedung SET $set WHERE id={$cek['id']}");
   } else {
-    $fStr = "gedung_id,tahun,bulan,tanggal_cek,dinding,atap_talang,lantai,wastafel,pintu_kaca,toilet,lain_lain,paraf,catatan,users_id,foto";
-    $v1 = $vals['dinding'] ? "'{$vals['dinding']}'" : 'NULL';
-    $v2 = $vals['atap_talang'] ? "'{$vals['atap_talang']}'" : 'NULL';
-    $v3 = $vals['lantai'] ? "'{$vals['lantai']}'" : 'NULL';
-    $v4 = $vals['wastafel'] ? "'{$vals['wastafel']}'" : 'NULL';
-    $v5 = $vals['pintu_kaca'] ? "'{$vals['pintu_kaca']}'" : 'NULL';
-    $v6 = $vals['toilet'] ? "'{$vals['toilet']}'" : 'NULL';
-    $v7 = $vals['lain_lain'] ? "'{$vals['lain_lain']}'" : 'NULL';
+    // Build insert string dinamis berdasarkan fields yang ada di master_item
+    $fStr = "gedung_id,tahun,bulan,tanggal_cek," . implode(',', $fields) . ",paraf,catatan,users_id,foto";
+    
+    $vArr = [];
+    foreach ($fields as $f) {
+      $vArr[] = $vals[$f] ? "'{$vals[$f]}'" : 'NULL';
+    }
+    
     $ft = $foto_name ? "'$foto_name'" : 'NULL';
-    mysqli_query($conn, "INSERT INTO checklist_gedung ($fStr) VALUES ($gedung_id,$tahun,$bulan,'$tgl',$v1,$v2,$v3,$v4,$v5,$v6,$v7,'$paraf','$catatan',$uid,$ft)");
+    $vStr = "$gedung_id,$tahun,$bulan,'$tgl'," . implode(',', $vArr) . ",'$paraf','$catatan',$uid,$ft";
+    
+    mysqli_query($conn, "INSERT INTO checklist_gedung ($fStr) VALUES ($vStr)");
   }
   header("Location: gedung_kartu.php?gedung_id=$gedung_id&tahun=$tahun");
   exit;
@@ -94,15 +123,6 @@ while ($r = mysqli_fetch_assoc($res)) {
 }
 
 $bulanNama = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
-$items = [
-  'dinding' => 'Dinding',
-  'atap_talang' => 'Atap/Talang',
-  'lantai' => 'Lantai',
-  'wastafel' => 'Wastafel',
-  'pintu_kaca' => 'Pintu/Kaca',
-  'toilet' => 'Toilet',
-  'lain_lain' => 'Lain-lain',
-];
 $editBulan = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
 $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 ?>
@@ -340,11 +360,11 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     }
   </style>
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3a8a">
-    <link rel="apple-touch-icon" href="assets/images/cba.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <link rel="apple-touch-icon" href="assets/images/cba.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
 <body>
@@ -492,8 +512,9 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
                   ?>
                   <td colspan="3" class="text-center">
                     <?php if ($foto): ?>
-                      <img src="uploads/<?= $foto ?>" style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid #ddd;" 
-                           title="Lihat Foto" onclick="previewFoto('uploads/<?= $foto ?>')">
+                      <img src="uploads/<?= $foto ?>"
+                        style="width:45px; height:30px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid #ddd;"
+                        title="Lihat Foto" onclick="previewFoto('uploads/<?= $foto ?>')">
                     <?php else: ?>
                       <span class="empty-cell" style="font-size:9px">-</span>
                     <?php endif; ?>
@@ -588,7 +609,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <label class="form-label fw-semibold small">Bulan</label>
+            <label class="form-label fw-semibold small">Bulan <span class="text-danger">*</span></label>
             <select class="form-select form-select-sm" name="bulan_select" id="bulanSelect" required
               onchange="document.getElementById('editBulan').value=this.value">
               <option value="">-- Pilih Bulan --</option>
@@ -598,7 +619,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
             </select>
           </div>
           <div class="col-6">
-            <label class="form-label fw-semibold small">Tanggal Cek</label>
+            <label class="form-label fw-semibold small">Tanggal Cek <span class="text-danger">*</span></label>
             <input type="date" class="form-control form-control-sm" name="tanggal_cek" id="inputTgl" required>
           </div>
         </div>
@@ -632,7 +653,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <label class="form-label fw-semibold small">Paraf Pemeriksa</label>
+            <label class="form-label fw-semibold small">Paraf Pemeriksa <span class="text-danger">*</span></label>
             <input type="text" class="form-control form-control-sm" name="paraf" id="inputParaf"
               placeholder="Nama / Paraf">
           </div>
@@ -642,12 +663,13 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
               placeholder="Catatan tambahan">
           </div>
           <div class="col-12 mt-0">
-            <label class="form-label fw-semibold small">Foto Bukti (Opsional)</label>
+            <label class="form-label fw-semibold small">Foto Bukti <span class="text-danger">*</span></label>
             <input type="file" name="foto" id="inputFoto" class="form-control form-control-sm" accept="image/*">
             <small class="text-secondary" style="font-size:10px">Format: JPG, PNG, WEBP. Maks 2MB.</small>
             <div id="previewContainer" class="mt-2 d-none">
               <div class="d-flex align-items-center gap-2">
-                <img id="imagePreview" src="#" alt="Preview" style="max-width: 100px; max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
+                <img id="imagePreview" src="#" alt="Preview"
+                  style="max-width: 100px; max-height: 100px; border-radius: 4px; border: 1px solid #ddd;">
                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="resetFoto()">
                   <i class="fa-solid fa-times"></i> Hapus
                 </button>
@@ -657,7 +679,8 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
         </div>
 
         <div class="d-flex gap-2">
-          <button type="submit" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff">
+          <button type="button" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff"
+            onclick="validasiDanSimpan()">
             <i class="fa-solid fa-save me-1"></i>Simpan
           </button>
           <button type="button" class="btn btn-secondary"
@@ -807,20 +830,68 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       document.getElementById('previewContainer').classList.add('d-none');
       document.getElementById('imagePreview').src = '#';
     }
+
+    function validasiDanSimpan() {
+      var bulan = document.getElementById('bulanSelect').value;
+      var tanggal = document.getElementById('inputTgl').value;
+      var paraf = document.getElementById('inputParaf').value.trim();
+      var inputFoto = document.getElementById('inputFoto');
+      var adaFotoLama = bulan && existingData[bulan] && existingData[bulan].foto;
+      var adaFotoBaru = inputFoto.files && inputFoto.files.length > 0;
+
+      var errors = [];
+      if (!bulan) errors.push('Bulan');
+      if (!tanggal) errors.push('Tanggal Cek');
+      if (!paraf) errors.push('Paraf Pemeriksa');
+
+      if (errors.length > 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Belum Lengkap!',
+          html: 'Harap isi field berikut:<br><b>' + errors.join(', ') + '</b>',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      if (!adaFotoLama && !adaFotoBaru) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Foto Bukti Wajib!',
+          text: 'Harap tambahkan foto bukti pengecekan sebelum menyimpan.',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: '<i class="fa-solid fa-camera me-1"></i>Ok, Tambahkan Foto'
+        });
+        return;
+      }
+      document.getElementById('formPerawatan').submit();
+    }
+
+    // Tampilkan pesan error dari server jika ada
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'foto_wajib'): ?>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Foto Bukti Wajib!',
+        text: 'Harap tambahkan foto bukti pengecekan sebelum menyimpan.',
+        confirmButtonColor: '#2563eb',
+        confirmButtonText: 'Ok'
+      });
+    <?php endif; ?>
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-    </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>

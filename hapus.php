@@ -44,6 +44,12 @@ if (isset($_GET['id'])) {
         header("Location: grease_trap_home.php?pesan=hapus_sukses");
         exit;
     }
+    elseif (isset($_GET['hapus_toilet'])) {
+        mysqli_query($conn, "DELETE FROM toilet_unit WHERE id = $id");
+        mysqli_query($conn, "DELETE FROM checklist_toilet WHERE toilet_id = $id");
+        header("Location: toilet_home.php?pesan=hapus_sukses");
+        exit;
+    }
 }
 
 $conn->close();

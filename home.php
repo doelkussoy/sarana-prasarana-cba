@@ -101,11 +101,16 @@ include "login_session.php";
 
                         <!-- Data APAR -->
                         <a href="data_apar.php" class="btn btn-secondary rounded-2 px-4 me-2"><i
-                                class="fa-solid fa-table me-2"></i>Data APAR</a>
+                            class="fa-solid fa-table me-2"></i>Data APAR</a>
+
+                        <!-- Perawatan Toilet -->
+                        <a href="toilet_home.php" class="btn btn-info rounded-2 px-4 me-2 text-white"><i
+                            class="fa-solid fa-restroom me-2"></i>Perawatan Toilet</a>
+
 
                         <!-- Laporan -->
                         <button onclick="laporanChecklist()" class="btn btn-secondary rounded-2 px-4"><i
-                                class="fa-solid fa-file-lines me-2"></i>Laporan</button>
+                            class="fa-solid fa-file-lines me-2"></i>Laporan</button>
                     </div>
                     <div class="col-sm-4">
                         <!-- Search box -->

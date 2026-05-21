@@ -17,11 +17,29 @@ if (!$aparRow) {
   exit;
 }
 
+// Ambil daftar item dari master_item
+$items = [];
+$fields = [];
+$resItems = mysqli_query($conn, "SELECT kolom, label FROM master_item WHERE modul='apar' AND is_active=1 ORDER BY id ASC");
+if(mysqli_num_rows($resItems) == 0) {
+    // Fallback seed (jika master_item belum pernah dibuka sama sekali)
+    $defaultApar = ['label_pengisian' => 'Label pengisian ulang','tekanan_pressure' => 'Tekanan (pressure) Amper','safety_pin' => 'Safety pin','handle' => 'Handle','selang_nozzle' => 'Selang (Nozzle)','dry_chemical' => 'Dry Chemical','tablulan' => 'Tablulan','bambu_petunjuk' => 'Bambu & petunjuk penggunaan'];
+    foreach($defaultApar as $k => $l) {
+        mysqli_query($conn, "INSERT IGNORE INTO master_item (modul, kolom, label, is_active) VALUES ('apar', '$k', '$l', 1)");
+        $items[$k] = $l;
+        $fields[] = $k;
+    }
+} else {
+    while ($rItem = mysqli_fetch_assoc($resItems)) {
+        $items[$rItem['kolom']] = $rItem['label'];
+        $fields[] = $rItem['kolom'];
+    }
+}
+
 // Handle simpan perawatan
 if (isset($_POST['simpan_checklist'])) {
   $bulan = (int) $_POST['bulan'];
   $tgl = mysqli_real_escape_string($conn, $_POST['tanggal_cek']);
-  $fields = ['label_pengisian', 'tekanan_pressure', 'safety_pin', 'handle', 'selang_nozzle', 'dry_chemical', 'tablulan', 'bambu_petunjuk'];
   $vals = [];
   foreach ($fields as $f) {
     $vals[$f] = isset($_POST[$f]) ? mysqli_real_escape_string($conn, $_POST[$f]) : null;
@@ -49,6 +67,12 @@ if (isset($_POST['simpan_checklist'])) {
     }
   }
 
+  // Validasi: foto wajib ada (baru atau lama)
+  if (!$foto_name) {
+    header("Location: apar_kartu.php?apar_id=$apar_id&tahun=$tahun&error=foto_wajib");
+    exit;
+  }
+
   // Cek sudah ada?
   $cek = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM checklist_apar WHERE apar_id=$apar_id AND tahun=$tahun AND bulan=$bulan"));
   if ($cek) {
@@ -64,17 +88,18 @@ if (isset($_POST['simpan_checklist'])) {
     $set = implode(',', $setArr);
     mysqli_query($conn, "UPDATE checklist_apar SET $set WHERE id={$cek['id']}");
   } else {
-    $fStr = "apar_id,tahun,bulan,tanggal_cek,label_pengisian,tekanan_pressure,safety_pin,handle,selang_nozzle,dry_chemical,tablulan,bambu_petunjuk,paraf,catatan,users_id,foto";
-    $lp = $vals['label_pengisian'] ? "'{$vals['label_pengisian']}'" : 'NULL';
-    $tp = $vals['tekanan_pressure'] ? "'{$vals['tekanan_pressure']}'" : 'NULL';
-    $sp = $vals['safety_pin'] ? "'{$vals['safety_pin']}'" : 'NULL';
-    $hd = $vals['handle'] ? "'{$vals['handle']}'" : 'NULL';
-    $sn = $vals['selang_nozzle'] ? "'{$vals['selang_nozzle']}'" : 'NULL';
-    $dc = $vals['dry_chemical'] ? "'{$vals['dry_chemical']}'" : 'NULL';
-    $tb = $vals['tablulan'] ? "'{$vals['tablulan']}'" : 'NULL';
-    $bp = $vals['bambu_petunjuk'] ? "'{$vals['bambu_petunjuk']}'" : 'NULL';
+    // Build insert string dinamis berdasarkan fields yang ada di master_item
+    $fStr = "apar_id,tahun,bulan,tanggal_cek," . implode(',', $fields) . ",paraf,catatan,users_id,foto";
+    
+    $vArr = [];
+    foreach ($fields as $f) {
+      $vArr[] = $vals[$f] ? "'{$vals[$f]}'" : 'NULL';
+    }
+    
     $ft = $foto_name ? "'$foto_name'" : 'NULL';
-    mysqli_query($conn, "INSERT INTO checklist_apar ($fStr) VALUES ($apar_id,$tahun,$bulan,'$tgl',$lp,$tp,$sp,$hd,$sn,$dc,$tb,$bp,'$paraf','$catatan',$uid,$ft)");
+    $vStr = "$apar_id,$tahun,$bulan,'$tgl'," . implode(',', $vArr) . ",'$paraf','$catatan',$uid,$ft";
+    
+    mysqli_query($conn, "INSERT INTO checklist_apar ($fStr) VALUES ($vStr)");
   }
   header("Location: apar_kartu.php?apar_id=$apar_id&tahun=$tahun");
   exit;
@@ -99,16 +124,6 @@ while ($r = mysqli_fetch_assoc($res)) {
 }
 
 $bulanNama = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
-$items = [
-  'label_pengisian' => 'Label pengisian ulang',
-  'tekanan_pressure' => 'Tekanan (pressure) Amper',
-  'safety_pin' => 'Safety pin',
-  'handle' => 'Handle',
-  'selang_nozzle' => 'Selang (Nozzle)',
-  'dry_chemical' => 'Dry Chemical',
-  'tablulan' => 'Tablulan',
-  'bambu_petunjuk' => 'Bambu & petunjuk penggunaan',
-];
 $editBulan = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
 $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 ?>
@@ -594,7 +609,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <label class="form-label fw-semibold small">Bulan</label>
+            <label class="form-label fw-semibold small">Bulan <span class="text-danger">*</span></label>
             <select class="form-select form-select-sm" name="bulan_select" id="bulanSelect" required
               onchange="document.getElementById('editBulan').value=this.value">
               <option value="">-- Pilih Bulan --</option>
@@ -604,7 +619,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
             </select>
           </div>
           <div class="col-6">
-            <label class="form-label fw-semibold small">Tanggal Cek</label>
+            <label class="form-label fw-semibold small">Tanggal Cek <span class="text-danger">*</span></label>
             <input type="date" class="form-control form-control-sm" name="tanggal_cek" id="inputTgl" required>
           </div>
         </div>
@@ -638,7 +653,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
         <div class="row g-3 mb-3">
           <div class="col-6">
-            <label class="form-label fw-semibold small">Paraf Pemeriksa</label>
+            <label class="form-label fw-semibold small">Paraf Pemeriksa <span class="text-danger">*</span></label>
             <input type="text" class="form-control form-control-sm" name="paraf" id="inputParaf"
               placeholder="Nama / Paraf">
           </div>
@@ -648,7 +663,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
               placeholder="Catatan tambahan">
           </div>
           <div class="col-12 mt-0">
-            <label class="form-label fw-semibold small">Foto Bukti (Opsional)</label>
+            <label class="form-label fw-semibold small">Foto Bukti <span class="text-danger">*</span></label>
             <input type="file" name="foto" id="inputFoto" class="form-control form-control-sm" accept="image/*">
             <small class="text-secondary" style="font-size:10px">Format: JPG, PNG, WEBP. Maks 2MB.</small>
             <div id="previewContainer" class="mt-2 d-none">
@@ -664,7 +679,8 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
         </div>
 
         <div class="d-flex gap-2">
-          <button type="submit" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff">
+          <button type="button" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff"
+            onclick="validasiDanSimpan()">
             <i class="fa-solid fa-save me-1"></i>Simpan
           </button>
           <button type="button" class="btn btn-secondary"
@@ -816,6 +832,54 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       document.getElementById('previewContainer').classList.add('d-none');
       document.getElementById('imagePreview').src = '#';
     }
+
+    function validasiDanSimpan() {
+      var bulan = document.getElementById('editBulan').value;
+      var tanggal = document.getElementById('inputTgl').value;
+      var paraf = document.getElementById('inputParaf').value.trim();
+      var inputFoto = document.getElementById('inputFoto');
+      var adaFotoLama = bulan && existingData[bulan] && existingData[bulan].foto;
+      var adaFotoBaru = inputFoto.files && inputFoto.files.length > 0;
+
+      var errors = [];
+      if (!bulan) errors.push('Bulan');
+      if (!tanggal) errors.push('Tanggal Cek');
+      if (!paraf) errors.push('Paraf Pemeriksa');
+
+      if (errors.length > 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Data Belum Lengkap!',
+          html: 'Harap isi field berikut:<br><b>' + errors.join(', ') + '</b>',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Ok'
+        });
+        return;
+      }
+
+      if (!adaFotoLama && !adaFotoBaru) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Foto Bukti Wajib!',
+          text: 'Harap tambahkan foto bukti pengecekan sebelum menyimpan.',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: '<i class="fa-solid fa-camera me-1"></i>Ok, Tambahkan Foto'
+        });
+        return;
+      }
+      document.getElementById('formPerawatan').submit();
+    }
+
+    // Tampilkan pesan error dari server jika ada
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'foto_wajib'): ?>
+      Swal.fire({
+        icon: 'warning',
+        title: 'Foto Bukti Wajib!',
+        text: 'Harap tambahkan foto bukti pengecekan sebelum menyimpan.',
+        confirmButtonColor: '#2563eb',
+        confirmButtonText: 'Ok'
+      });
+    <?php endif; ?>
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 

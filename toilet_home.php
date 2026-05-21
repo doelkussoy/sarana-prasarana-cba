@@ -7,58 +7,52 @@ if (!isset($_SESSION['username'])) {
 }
 
 // Setup tabel jika belum ada
-mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `apar` (
+mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `toilet_unit` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `no_kode` varchar(50) NOT NULL,
-  `nama_sarana` varchar(100) DEFAULT NULL,
+  `nama_sarana` varchar(100) DEFAULT 'Toilet',
   `lokasi` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `checklist_apar` (
+mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `checklist_toilet` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `apar_id` int(11) NOT NULL,
+  `toilet_id` int(11) NOT NULL,
   `tahun` int(4) NOT NULL,
   `bulan` tinyint(2) NOT NULL,
   `tanggal_cek` date DEFAULT NULL,
-  `label_pengisian` enum('Ok','Nok') DEFAULT NULL,
-  `tekanan_pressure` enum('Ok','Nok') DEFAULT NULL,
-  `safety_pin` enum('Ok','Nok') DEFAULT NULL,
-  `handle` enum('Ok','Nok') DEFAULT NULL,
-  `selang_nozzle` enum('Ok','Nok') DEFAULT NULL,
-  `dry_chemical` enum('Ok','Nok') DEFAULT NULL,
-  `tablulan` enum('Ok','Nok') DEFAULT NULL,
-  `bambu_petunjuk` enum('Ok','Nok') DEFAULT NULL,
+  `tissue_toilet` enum('Ok','Nok') DEFAULT NULL,
+  `lantai_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `closet_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `dinding_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `kran_shower` enum('Ok','Nok') DEFAULT NULL,
+  `sarang_laba` enum('Ok','Nok') DEFAULT NULL,
+  `tersedia_pewangi` enum('Ok','Nok') DEFAULT NULL,
+  `lap_sabun` enum('Ok','Nok') DEFAULT NULL,
+  `tempat_sampah` enum('Ok','Nok') DEFAULT NULL,
+  `matikan_lampu` enum('Ok','Nok') DEFAULT NULL,
   `paraf` varchar(100) DEFAULT NULL,
   `catatan` text DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
   `users_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_toilet_date` (`toilet_id`, `tanggal_cek`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
-// Cek apakah ada data APAR, jika tidak insert sample
-$cekApar = mysqli_query($conn, "SELECT COUNT(*) as total FROM apar");
-$rowCek = mysqli_fetch_assoc($cekApar);
-// if ($rowCek['total'] == 0) {
-//   mysqli_query($conn, "INSERT INTO `apar` (`no_kode`, `nama_sarana`, `lokasi`) VALUES
-//     ('KNR-1','APAR 9 KG','GEDUNG UTAMA LANTAI 1'),
-//     ('KNR-2','APAR 6 KG','GEDUNG UTAMA LANTAI 2'),
-//     ('KNR-3','APAR 3 KG','RUANG SERVER')");
-// }
-
-// Handle tambah APAR
-if (isset($_POST['tambah_apar'])) {
+// Handle tambah Toilet
+if (isset($_POST['tambah_toilet'])) {
   $kode = mysqli_real_escape_string($conn, trim($_POST['no_kode']));
   $nama = mysqli_real_escape_string($conn, $_POST['nama_sarana']);
   $lok = mysqli_real_escape_string($conn, $_POST['lokasi']);
   // Cek duplikat kode
-  $cekKode = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM apar WHERE no_kode='$kode'"));
+  $cekKode = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM toilet_unit WHERE no_kode='$kode'"));
   if ($cekKode) {
-    header("Location: apar_home.php?error=duplikat&kode=" . urlencode($kode));
+    header("Location: toilet_home.php?error=duplikat&kode=" . urlencode($kode));
     exit;
   }
-  mysqli_query($conn, "INSERT INTO apar (no_kode, nama_sarana, lokasi) VALUES ('$kode','$nama','$lok')");
-  header("Location: apar_home.php");
+  mysqli_query($conn, "INSERT INTO toilet_unit (no_kode, nama_sarana, lokasi) VALUES ('$kode','$nama','$lok')");
+  header("Location: toilet_home.php");
   exit;
 }
 
@@ -68,7 +62,7 @@ if ($keyword != '') {
   $where = "WHERE no_kode LIKE '%$keyword%' OR nama_sarana LIKE '%$keyword%' OR lokasi LIKE '%$keyword%'";
 }
 
-$listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC");
+$listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_kode ASC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -76,7 +70,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sarana Prasarana - Manajemen APAR</title>
+  <title>Sarana Prasarana - Manajemen Toilet</title>
   <link rel="icon" type="image/png" href="assets/images/cba.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a404219d80.js" crossorigin="anonymous"></script>
@@ -97,35 +91,35 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
       flex-direction: column;
     }
 
-    .navbar-apar {
+    .navbar-toilet {
       background: linear-gradient(135deg, var(--blue-dark), var(--blue-light));
     }
 
-    .card-apar {
+    .card-toilet {
       border: none;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, .1);
     }
 
-    .card-apar-header {
+    .card-toilet-header {
       background: #fff;
       color: #333;
       border-radius: 16px 16px 0 0;
       padding: 20px 24px;
     }
 
-    .btn-apar {
+    .btn-toilet {
       background: var(--blue);
       border: none;
       color: #fff;
     }
 
-    .btn-apar:hover {
+    .btn-toilet:hover {
       background: var(--blue-dark);
       color: #fff;
     }
 
-    .apar-badge {
+    .toilet-badge {
       background: rgba(37, 99, 235, 0.1);
       color: var(--blue);
       font-weight: 600;
@@ -248,7 +242,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
         letter-spacing: 0.5px;
       }
 
-      .apar-badge {
+      .toilet-badge {
         margin: 0;
       }
     }
@@ -262,13 +256,13 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
 </head>
 
 <body>
-  <nav class="navbar navbar-apar fixed-top py-3 shadow">
+  <nav class="navbar navbar-toilet fixed-top py-3 shadow">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center gap-2 text-white" style="cursor:pointer"
         onclick="window.location.href='dashboard.php'">
         <img src="assets/images/cba.png" alt="Logo CBA"
           style="height:40px; background:white; padding:4px; border-radius:8px;">
-        <span class="fw-bold fs-5 d-none d-sm-inline" style="letter-spacing:1px">PERAWATAN APAR</span>
+        <span class="fw-bold fs-5 d-none d-sm-inline" style="letter-spacing:1px">PERAWATAN TOILET</span>
       </div>
       <div class="d-flex align-items-center gap-2 gap-md-3">
         <span class="text-white small d-none d-md-inline"><i
@@ -282,16 +276,16 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
   </nav>
 
   <div class="container" style="margin-top:100px; padding-bottom:40px; flex:1;">
-    <div class="card card-apar">
-      <div class="card-apar-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="card card-toilet">
+      <div class="card-toilet-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="d-flex align-items-center gap-3">
           <a href="dashboard.php" class="btn btn-sm btn-outline-secondary rounded-pill" title="Kembali ke Dashboard">
             <i class="fa-solid fa-arrow-left me-1"></i><span class="d-none d-sm-inline"></span>
           </a>
           <div>
-            <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-fire-extinguisher me-2"></i>Daftar Unit APAR
+            <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-restroom me-2"></i>Daftar Unit Toilet
             </h5>
-            <small class="opacity-75">Kartu Riwayat Pengecekan</small>
+            <small class="opacity-75">Kartu Riwayat Pengecekan Harian</small>
           </div>
         </div>
 
@@ -303,7 +297,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
               <button type="submit" class="btn btn-light text-primary border"><i
                   class="fa-solid fa-search"></i></button>
               <?php if ($keyword != ''): ?>
-                <a href="apar_home.php" class="btn btn-secondary border"><i class="fa-solid fa-times"></i></a>
+                <a href="toilet_home.php" class="btn btn-secondary border"><i class="fa-solid fa-times"></i></a>
               <?php endif; ?>
             </div>
           </form>
@@ -311,7 +305,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
           <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
             <button class="btn btn-primary btn-sm px-3 rounded-pill fw-bold shadow-sm text-nowrap"
               onclick="document.getElementById('modalTambah').classList.add('active')">
-              <i class="fa-solid fa-plus me-1"></i>Tambah APAR
+              <i class="fa-solid fa-plus me-1"></i>Tambah Toilet
             </button>
           <?php endif; ?>
         </div>
@@ -330,17 +324,17 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
             </thead>
             <tbody>
               <?php $no = 1;
-              while ($row = mysqli_fetch_assoc($listApar)): ?>
+              while ($row = mysqli_fetch_assoc($listToilet)): ?>
                 <tr>
                   <td data-label="No"><?= $no++ ?></td>
-                  <td data-label="Kode"><span class="apar-badge"><?= htmlspecialchars($row['no_kode']) ?></span></td>
+                  <td data-label="Kode"><span class="toilet-badge"><?= htmlspecialchars($row['no_kode']) ?></span></td>
                   <td data-label="Nama Sarana"><?= htmlspecialchars($row['nama_sarana']) ?></td>
                   <td data-label="Lokasi">
                     <span><i
                         class="fa-solid fa-location-dot text-danger me-1"></i><?= htmlspecialchars($row['lokasi']) ?></span>
                   </td>
                   <td data-label="Aksi">
-                    <a href="apar_kartu.php?apar_id=<?= $row['id'] ?>" class="btn btn-kartu btn-sm flex-grow-1">
+                    <a href="toilet_kartu.php?toilet_id=<?= $row['id'] ?>" class="btn btn-kartu btn-sm flex-grow-1">
                       <i class="fa-solid fa-table me-1"></i><span class="d-inline">Kartu Riwayat</span>
                     </a>
                     <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
@@ -358,34 +352,29 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
     </div>
   </div>
 
-  <!-- Modal Tambah APAR -->
+  <!-- Modal Tambah Toilet -->
   <div class="modal-overlay" id="modalTambah">
     <div class="modal-box">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-fire-extinguisher me-2"></i>Tambah Unit APAR</h5>
+        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-restroom me-2"></i>Tambah Unit Toilet</h5>
         <button class="btn-close" onclick="document.getElementById('modalTambah').classList.remove('active')"></button>
       </div>
       <hr>
       <form method="POST">
         <div class="mb-3">
           <label class="form-label fw-semibold">Kode</label>
-          <input type="text" class="form-control" name="no_kode" placeholder="Contoh: KNR-1" required>
+          <input type="text" class="form-control" name="no_kode" placeholder="Contoh: TLT-1" required>
         </div>
         <div class="mb-3">
           <label class="form-label fw-semibold">Nama Sarana</label>
-          <input type="text" class="form-control" name="nama_sarana" placeholder="Contoh: APAR 9 KG"
-            list="saranNamaSaranaApar" autocomplete="off" required>
-          <datalist id="saranNamaSaranaApar">
-            <option value="APAR 6 KG">
-            <option value="APAR 9 KG">
-          </datalist>
+          <input type="text" class="form-control" name="nama_sarana" placeholder="Contoh: Toilet Pria" value="Toilet" required>
         </div>
         <div class="mb-4">
           <label class="form-label fw-semibold">Lokasi</label>
           <input type="text" class="form-control" name="lokasi" placeholder="Contoh: GEDUNG UTAMA LANTAI 1" required>
         </div>
         <div class="d-flex gap-2">
-          <button type="submit" name="tambah_apar" class="btn btn-primary w-100 py-2 fw-bold">
+          <button type="submit" name="tambah_toilet" class="btn btn-primary w-100 py-2 fw-bold">
             <i class="fa-solid fa-save me-1"></i>Simpan
           </button>
           <button type="button" class="btn btn-secondary px-4"
@@ -396,15 +385,15 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
   </div>
 
   <footer class="py-3 text-center">
-    &copy; <?= date('Y') ?> - Sistem Perawatan APAR | Team IT Pabrik
+    &copy; <?= date('Y') ?> - Sistem Perawatan Toilet | Team IT Pabrik
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     function confirmDelete(id) {
       Swal.fire({
-        title: 'Hapus Data APAR?',
-        text: "Semua riwayat perawatan untuk APAR ini akan ikut terhapus secara permanen!",
+        title: 'Hapus Data Toilet?',
+        text: "Semua riwayat perawatan untuk Toilet ini akan ikut terhapus secara permanen!",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
@@ -419,7 +408,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
         buttonsStyling: false
       }).then((result) => {
         if (result.isConfirmed) {
-          window.location.href = 'hapus.php?hapus_apar=1&id=' + id;
+          window.location.href = 'hapus.php?hapus_toilet=1&id=' + id;
         }
       });
     }
@@ -440,7 +429,7 @@ $listApar = mysqli_query($conn, "SELECT * FROM apar $where ORDER BY no_kode ASC"
       Swal.fire({
         icon: 'success',
         title: 'Berhasil!',
-        text: 'Data APAR beserta perawatan telah dihapus.',
+        text: 'Data Toilet beserta perawatan telah dihapus.',
         showConfirmButton: false,
         timer: 2500,
         toast: true,

@@ -86,11 +86,11 @@ if (!isset($_SESSION['username'])) {
     }
   </style>
 
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e3a8a">
-    <link rel="apple-touch-icon" href="assets/images/cba.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e3a8a">
+  <link rel="apple-touch-icon" href="assets/images/cba.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
 <body>
@@ -103,10 +103,19 @@ if (!isset($_SESSION['username'])) {
       </div>
       <div class="d-flex align-items-center gap-2 gap-md-3">
         <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
+          <a href="master_item.php"
+            class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold d-none d-sm-inline">
+            <i class="fa-solid fa-list-check me-1"></i>Master Pengecekan
+          </a>
+          <a href="master_item.php" class="btn btn-sm btn-light text-primary rounded-pill d-inline d-sm-none"
+            title="Master Pengecekan">
+            <i class="fa-solid fa-list-check"></i>
+          </a>
           <a href="users.php" class="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold d-none d-sm-inline">
             <i class="fa-solid fa-users-gear me-1"></i>Manajemen User
           </a>
-          <a href="users.php" class="btn btn-sm btn-light text-primary rounded-pill d-inline d-sm-none" title="User Management">
+          <a href="users.php" class="btn btn-sm btn-light text-primary rounded-pill d-inline d-sm-none"
+            title="Manajemen User">
             <i class="fa-solid fa-users-gear"></i>
           </a>
         <?php endif; ?>
@@ -172,6 +181,17 @@ if (!isset($_SESSION['username'])) {
             riwayat grease trap.</div>
         </a>
       </div>
+
+      <!-- Modul Toilet -->
+      <div class="col-12 col-md-6">
+        <a href="toilet_home.php" class="menu-card text-decoration-none">
+          <i class="fa-solid fa-restroom menu-icon"></i>
+          <div class="menu-title">Perawatan Toilet</div>
+          <div class="menu-desc">Kelola checklist perawatan toilet per hari, lihat riwayat, dan cetak kartu perawatan.</div>
+        </a>
+      </div>
+
+
     </div>
   </div>
 
@@ -181,17 +201,17 @@ if (!isset($_SESSION['username'])) {
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    console.log('ServiceWorker registration successful');
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
-    </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('ServiceWorker registration successful');
+        }).catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>

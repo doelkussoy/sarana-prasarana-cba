@@ -110,8 +110,10 @@ $conn->close();
                 <span class="navbar-text text-white">
                     <?php
                     date_default_timezone_set('Asia/Jakarta');
-                    $hari = date('l');
-                    $tanggal = date('d F Y');
+                    $days = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+                    $months = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
+                    $hari = $days[date('l')];
+                    $tanggal = date('d') . ' ' . $months[date('F')] . ' ' . date('Y');
                     echo $hari . ', ' . $tanggal;
                     ?>
                 </span>

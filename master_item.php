@@ -209,9 +209,6 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
           </li>
         </ul>
 
-        <div class="alert alert-info py-2 small">
-          <i class="fa-solid fa-info-circle me-1"></i> <strong>Catatan:</strong> Item yang ditambahkan akan otomatis muncul di form pengisian dan kartu riwayat. Item yang dihapus hanya akan disembunyikan agar data lama tetap aman.
-        </div>
 
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">

@@ -49,22 +49,39 @@ $rowCek = mysqli_fetch_assoc($cekHydrant);
 if (isset($_POST['tambah_hydrant'])) {
   $lok = mysqli_real_escape_string($conn, $_POST['lokasi']);
 
-  // Auto Increment Kode (HYD-01, HYD-02, ...)
-  $lastData = mysqli_fetch_assoc(mysqli_query($conn, "SELECT no_kode FROM hydrant ORDER BY id DESC LIMIT 1"));
-  if ($lastData) {
-    $lastKode = $lastData['no_kode'];
-    preg_match('/\d+$/', $lastKode, $matches);
-    $num = isset($matches[0]) ? (int) $matches[0] : 0;
-    $newNum = str_pad($num + 1, 2, '0', STR_PAD_LEFT);
-    $kode = "HYD-" . $newNum;
-  } else {
-    $kode = "HYD-01";
+  $cekLokasi = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM hydrant WHERE lokasi='$lok'"));
+  if ($cekLokasi) {
+      header("Location: hydrant_home.php?error=lokasi_duplikat&lokasi=" . urlencode($lok));
+      exit;
   }
+
+  $kodeRes = mysqli_query($conn, "SELECT MAX(CAST(SUBSTRING(no_kode,5) AS UNSIGNED)) AS max_num FROM hydrant");
+  $kodeRow = mysqli_fetch_assoc($kodeRes);
+  $nextNum = ($kodeRow['max_num'] ?? 0) + 1;
+  $newNum = str_pad($nextNum, 2, '0', STR_PAD_LEFT);
+  $kode = "HYD-" . $newNum;
 
   $nama = "Hydrant";
 
   mysqli_query($conn, "INSERT INTO hydrant (no_kode, nama_sarana, lokasi) VALUES ('$kode','$nama','$lok')");
   header("Location: hydrant_home.php");
+  exit;
+}
+
+// Handle edit Hydrant
+if (isset($_POST['edit_hydrant'])) {
+  $id = (int)$_POST['id_hydrant'];
+  $lokasi_baru = mysqli_real_escape_string($conn, $_POST['lokasi_baru']);
+
+  // Check duplicate lokasi exclude self
+  $cekLokasi = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM hydrant WHERE lokasi='$lokasi_baru' AND id != $id"));
+  if ($cekLokasi) {
+      header("Location: hydrant_home.php?error=lokasi_duplikat&lokasi=" . urlencode($lokasi_baru));
+      exit;
+  }
+
+  mysqli_query($conn, "UPDATE hydrant SET lokasi='$lokasi_baru' WHERE id=$id");
+  header("Location: hydrant_home.php?pesan=edit_sukses");
   exit;
 }
 
@@ -349,9 +366,12 @@ $listHydrant = mysqli_query($conn, "SELECT * FROM hydrant $where ORDER BY no_kod
                       <i class="fa-solid fa-table me-1"></i><span class="d-inline">Kartu Riwayat</span>
                     </a>
                     <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['id'] ?>)">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
+                      <button type="button" class="btn btn-warning btn-sm text-white" onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['lokasi'])) ?>')" title="Edit Lokasi">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['id'] ?>)" title="Hapus">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
                     <?php endif; ?>
                   </td>
                 </tr>
@@ -389,12 +409,44 @@ $listHydrant = mysqli_query($conn, "SELECT * FROM hydrant $where ORDER BY no_kod
     </div>
   </div>
 
+  <!-- Modal Edit Hydrant -->
+  <div class="modal-overlay" id="modalEdit">
+    <div class="modal-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Lokasi Hydrant</h5>
+        <button class="btn-close" onclick="document.getElementById('modalEdit').classList.remove('active')"></button>
+      </div>
+      <hr>
+      <form method="POST">
+        <input type="hidden" name="id_hydrant" id="edit_id">
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Lokasi Unit Baru</label>
+          <input type="text" class="form-control form-control-lg" name="lokasi_baru" id="edit_lokasi" placeholder="Masukkan Lokasi Baru..."
+            required autofocus>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" name="edit_hydrant" class="btn btn-primary w-100 py-2 fw-bold">
+            <i class="fa-solid fa-save me-1"></i>Simpan Perubahan
+          </button>
+          <button type="button" class="btn btn-secondary px-4"
+            onclick="document.getElementById('modalEdit').classList.remove('active')">Batal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <footer class="py-3 text-center">
     &copy; <?= date('Y') ?> - Sistem Perawatan Hydrant | Team IT Pabrik
   </footer>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    function openEditModal(id, lokasi) {
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_lokasi').value = lokasi;
+      document.getElementById('modalEdit').classList.add('active');
+    }
+
     function confirmDelete(id) {
       Swal.fire({
         title: 'Hapus Data Hydrant?',
@@ -418,29 +470,53 @@ $listHydrant = mysqli_query($conn, "SELECT * FROM hydrant $where ORDER BY no_kod
       });
     }
 
-    <?php if (isset($_GET['error']) && $_GET['error'] == 'duplikat'): ?>
-      Swal.fire({
-        icon: 'error',
-        title: 'Kode Sudah Digunakan!',
-        html: 'Kode <strong><?= htmlspecialchars($_GET['kode'] ?? '') ?></strong> sudah terdaftar.<br>Gunakan kode yang berbeda.',
-        confirmButtonColor: '#2563eb',
-        confirmButtonText: 'Oke'
-      });
+    <?php if (isset($_GET['error'])): ?>
+      <?php if ($_GET['error'] == 'duplikat'): ?>
+        Swal.fire({
+          icon: 'error',
+          title: 'Kode Sudah Digunakan!',
+          html: 'Kode <strong><?= htmlspecialchars($_GET['kode'] ?? '') ?></strong> sudah terdaftar.<br>Gunakan kode yang berbeda.',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Oke'
+        });
+      <?php elseif ($_GET['error'] == 'lokasi_duplikat'): ?>
+        Swal.fire({
+          icon: 'error',
+          title: 'Lokasi Sudah Digunakan!',
+          html: 'Lokasi <strong><?php echo htmlspecialchars($_GET['lokasi'] ?? '') ?></strong> sudah terdaftar untuk sarana lain.<br>Gunakan lokasi yang berbeda.',
+          confirmButtonColor: '#2563eb',
+          confirmButtonText: 'Oke'
+        });
+      <?php endif; ?>
     <?php endif; ?>
   </script>
 
-  <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'hapus_sukses'): ?>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Hydrant beserta perawatan telah dihapus.',
-        showConfirmButton: false,
-        timer: 2500,
-        toast: true,
-        position: 'top-end'
-      });
-    </script>
+  <?php if (isset($_GET['pesan'])): ?>
+    <?php if ($_GET['pesan'] == 'hapus_sukses'): ?>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data Hydrant beserta perawatan telah dihapus.',
+          showConfirmButton: false,
+          timer: 2500,
+          toast: true,
+          position: 'top-end'
+        });
+      </script>
+    <?php elseif ($_GET['pesan'] == 'edit_sukses'): ?>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Lokasi telah diperbarui.',
+          showConfirmButton: false,
+          timer: 2500,
+          toast: true,
+          position: 'top-end'
+        });
+      </script>
+    <?php endif; ?>
   <?php endif; ?>
 
     <script>

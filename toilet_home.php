@@ -40,29 +40,58 @@ mysqli_query($conn, "CREATE TABLE IF NOT EXISTS `checklist_toilet` (
   UNIQUE KEY `unique_toilet_date` (`toilet_id`, `tanggal_cek`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+
 // Handle tambah Toilet
 if (isset($_POST['tambah_toilet'])) {
-  $kode = mysqli_real_escape_string($conn, trim($_POST['no_kode']));
-  $nama = mysqli_real_escape_string($conn, $_POST['nama_sarana']);
   $lok = mysqli_real_escape_string($conn, $_POST['lokasi']);
-  // Cek duplikat kode
-  $cekKode = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM toilet_unit WHERE no_kode='$kode'"));
-  if ($cekKode) {
-    header("Location: toilet_home.php?error=duplikat&kode=" . urlencode($kode));
-    exit;
+  // Check for duplicate location across all units
+  $cekLokasi = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM toilet_unit WHERE lokasi='$lok'"));
+  if ($cekLokasi) {
+      header("Location: toilet_home.php?error=lokasi_duplikat&lokasi=" . urlencode($lok));
+      exit;
   }
-  mysqli_query($conn, "INSERT INTO toilet_unit (no_kode, nama_sarana, lokasi) VALUES ('$kode','$nama','$lok')");
+  // Generate auto code based on the highest existing numeric part of no_kode
+  $kodeRes = mysqli_query($conn, "SELECT MAX(CAST(SUBSTRING(no_kode,5) AS UNSIGNED)) AS max_num FROM toilet_unit");
+  $kodeRow = mysqli_fetch_assoc($kodeRes);
+  $nextNum = ($kodeRow['max_num'] ?? 0) + 1;
+  $kode = 'TLT-' . $nextNum;
+  $nama = 'Toilet';
+  // Insert new toilet unit
+  $insertResult = mysqli_query($conn, "INSERT INTO toilet_unit (no_kode, nama_sarana, lokasi) VALUES ('$kode','$nama','$lok')");
+  if (!$insertResult) {
+      header("Location: toilet_home.php?error=insert_failed");
+      exit;
+  }
   header("Location: toilet_home.php");
   exit;
 }
 
+// Handle edit Toilet
+if (isset($_POST['edit_toilet'])) {
+  $id = (int)$_POST['id_toilet'];
+  $lokasi_baru = mysqli_real_escape_string($conn, $_POST['lokasi_baru']);
+
+  // Check duplicate lokasi exclude self
+  $cekLokasi = mysqli_fetch_assoc(mysqli_query($conn, "SELECT id FROM toilet_unit WHERE lokasi='$lokasi_baru' AND id != $id"));
+  if ($cekLokasi) {
+      header("Location: toilet_home.php?error=lokasi_duplikat&lokasi=" . urlencode($lokasi_baru));
+      exit;
+  }
+
+  mysqli_query($conn, "UPDATE toilet_unit SET lokasi='$lokasi_baru' WHERE id=$id");
+  header("Location: toilet_home.php?pesan=edit_sukses");
+  exit;
+}
+?>
+
+<?php
 $keyword = isset($_GET['keyword']) ? mysqli_real_escape_string($conn, $_GET['keyword']) : '';
 $where = "";
 if ($keyword != '') {
   $where = "WHERE no_kode LIKE '%$keyword%' OR nama_sarana LIKE '%$keyword%' OR lokasi LIKE '%$keyword%'";
 }
 
-$listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_kode ASC");
+$listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY CAST(REGEXP_REPLACE(no_kode, '[^0-9]', '') AS UNSIGNED) ASC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -338,7 +367,10 @@ $listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_
                       <i class="fa-solid fa-table me-1"></i><span class="d-inline">Kartu Riwayat</span>
                     </a>
                     <?php if (($_SESSION['role'] ?? '') === 'Admin'): ?>
-                      <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['id'] ?>)">
+                      <button type="button" class="btn btn-warning btn-sm text-white" onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars(addslashes($row['lokasi'])) ?>')" title="Edit Lokasi">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(<?= $row['id'] ?>)" title="Hapus">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     <?php endif; ?>
@@ -361,24 +393,42 @@ $listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_
       </div>
       <hr>
       <form method="POST">
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Kode</label>
-          <input type="text" class="form-control" name="no_kode" placeholder="Contoh: TLT-1" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label fw-semibold">Nama Sarana</label>
-          <input type="text" class="form-control" name="nama_sarana" placeholder="Contoh: Toilet Pria" value="Toilet" required>
-        </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Lokasi</label>
+            <div class="mb-2"><small class="text-muted">Kode dan Nama Sarana akan dihasilkan otomatis.</small></div>
+            <input type="text" class="form-control" name="lokasi" placeholder="Contoh: GEDUNG UTAMA LANTAI 1" required>
+          </div>
+          <div class="d-flex gap-2">
+            <button type="submit" name="tambah_toilet" class="btn btn-primary w-100 py-2 fw-bold">
+              <i class="fa-solid fa-save me-1"></i>Simpan
+            </button>
+            <button type="button" class="btn btn-secondary px-4" onclick="document.getElementById('modalTambah').classList.remove('active')">Batal</button>
+          </div>
+        </form>
+    </div>
+  </div>
+
+  <!-- Modal Edit Toilet -->
+  <div class="modal-overlay" id="modalEdit">
+    <div class="modal-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Lokasi Toilet</h5>
+        <button class="btn-close" onclick="document.getElementById('modalEdit').classList.remove('active')"></button>
+      </div>
+      <hr>
+      <form method="POST">
+        <input type="hidden" name="id_toilet" id="edit_id">
         <div class="mb-4">
-          <label class="form-label fw-semibold">Lokasi</label>
-          <input type="text" class="form-control" name="lokasi" placeholder="Contoh: GEDUNG UTAMA LANTAI 1" required>
+          <label class="form-label fw-semibold">Lokasi Unit Baru</label>
+          <input type="text" class="form-control" name="lokasi_baru" id="edit_lokasi" placeholder="Masukkan Lokasi Baru..."
+            required autofocus>
         </div>
         <div class="d-flex gap-2">
-          <button type="submit" name="tambah_toilet" class="btn btn-primary w-100 py-2 fw-bold">
-            <i class="fa-solid fa-save me-1"></i>Simpan
+          <button type="submit" name="edit_toilet" class="btn btn-primary w-100 py-2 fw-bold">
+            <i class="fa-solid fa-save me-1"></i>Simpan Perubahan
           </button>
           <button type="button" class="btn btn-secondary px-4"
-            onclick="document.getElementById('modalTambah').classList.remove('active')">Batal</button>
+            onclick="document.getElementById('modalEdit').classList.remove('active')">Batal</button>
         </div>
       </form>
     </div>
@@ -390,6 +440,12 @@ $listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    function openEditModal(id, lokasi) {
+      document.getElementById('edit_id').value = id;
+      document.getElementById('edit_lokasi').value = lokasi;
+      document.getElementById('modalEdit').classList.add('active');
+    }
+
     function confirmDelete(id) {
       Swal.fire({
         title: 'Hapus Data Toilet?',
@@ -413,29 +469,61 @@ $listToilet = mysqli_query($conn, "SELECT * FROM toilet_unit $where ORDER BY no_
       });
     }
 
-    <?php if (isset($_GET['error']) && $_GET['error'] == 'duplikat'): ?>
-      Swal.fire({
-        icon: 'error',
-        title: 'Kode Sudah Digunakan!',
-        html: 'Kode <strong><?= htmlspecialchars($_GET['kode'] ?? '') ?></strong> sudah terdaftar.<br>Gunakan kode yang berbeda.',
-        confirmButtonColor: '#2563eb',
-        confirmButtonText: 'Oke'
-      });
-    <?php endif; ?>
+<?php if (isset($_GET['error'])): ?>
+  <?php if ($_GET['error'] == 'duplikat'): ?>
+    Swal.fire({
+      icon: 'error',
+      title: 'Kode Sudah Digunakan!',
+      html: 'Kode <strong><?php echo htmlspecialchars($_GET['kode'] ?? '') ?></strong> sudah terdaftar.<br>Gunakan kode yang berbeda.',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Oke'
+    });
+  <?php elseif ($_GET['error'] == 'lokasi_duplikat'): ?>
+    Swal.fire({
+      icon: 'error',
+      title: 'Lokasi Sudah Digunakan!',
+      html: 'Lokasi <strong><?php echo htmlspecialchars($_GET['lokasi'] ?? '') ?></strong> sudah terdaftar untuk sarana lain.<br>Gunakan lokasi yang berbeda.',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Oke'
+    });
+  <?php elseif ($_GET['error'] == 'insert_failed'): ?>
+    Swal.fire({
+      icon: 'error',
+      title: 'Gagal Menambahkan Toilet!',
+      text: 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.',
+      confirmButtonColor: '#2563eb',
+      confirmButtonText: 'Oke'
+    });
+  <?php endif; ?>
+<?php endif; ?>
   </script>
 
-  <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'hapus_sukses'): ?>
-    <script>
-      Swal.fire({
-        icon: 'success',
-        title: 'Berhasil!',
-        text: 'Data Toilet beserta perawatan telah dihapus.',
-        showConfirmButton: false,
-        timer: 2500,
-        toast: true,
-        position: 'top-end'
-      });
-    </script>
+  <?php if (isset($_GET['pesan'])): ?>
+    <?php if ($_GET['pesan'] == 'hapus_sukses'): ?>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Data Toilet beserta perawatan telah dihapus.',
+          showConfirmButton: false,
+          timer: 2500,
+          toast: true,
+          position: 'top-end'
+        });
+      </script>
+    <?php elseif ($_GET['pesan'] == 'edit_sukses'): ?>
+      <script>
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Lokasi telah diperbarui.',
+          showConfirmButton: false,
+          timer: 2500,
+          toast: true,
+          position: 'top-end'
+        });
+      </script>
+    <?php endif; ?>
   <?php endif; ?>
 
   <script>

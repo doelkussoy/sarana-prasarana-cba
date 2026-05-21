@@ -17,7 +17,8 @@ if (isset($_POST['login'])) {
         if (password_verify($password, $userData["pass"])) {
             $_SESSION["username"] = $username;
             $_SESSION["id"] = $userData["id"];
-            $_SESSION["role"] = $userData["role"];
+            $_SESSION["role"] = $userData["role"] === 'superadmin' ? 'Admin' : $userData["role"];
+            $_SESSION["is_superadmin"] = ($userData["role"] === 'superadmin');
             header('Location: dashboard.php');
             exit;
         } else {
@@ -25,7 +26,8 @@ if (isset($_POST['login'])) {
             if ($password === $userData["pass"]) {
                 $_SESSION["username"] = $username;
                 $_SESSION["id"] = $userData["id"];
-                $_SESSION["role"] = $userData["role"];
+                $_SESSION["role"] = $userData["role"] === 'superadmin' ? 'Admin' : $userData["role"];
+                $_SESSION["is_superadmin"] = ($userData["role"] === 'superadmin');
                 header('Location: dashboard.php');
                 exit;
             }

@@ -132,7 +132,11 @@ if (!isset($_SESSION['username'])) {
   <div class="container" style="margin-top:100px; padding-bottom:40px;">
     <div class="text-center mb-4 mb-md-5 px-2">
       <p class="text-secondary small mb-1" style="letter-spacing:1px;text-transform:uppercase;font-weight:600">
-        <i class="fa-regular fa-calendar me-1"></i><?= date('l, d F Y') ?>
+        <i class="fa-regular fa-calendar me-1"></i><?php
+        $days = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+        $months = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
+        echo $days[date('l')] . ', ' . date('d') . ' ' . $months[date('F')] . ' ' . date('Y');
+        ?>
       </p>
       <h3 class="fw-bold text-dark mb-1">
         Selamat Datang, <?= htmlspecialchars($_SESSION['username']) ?> 👋

@@ -46,7 +46,7 @@ if (isset($_GET['hapus'])) {
   exit;
 }
 
-$listUsers = mysqli_query($conn, "SELECT * FROM users ORDER BY username ASC");
+$listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin' ORDER BY username ASC");
 ?>
 <!DOCTYPE html>
 <html lang="id">

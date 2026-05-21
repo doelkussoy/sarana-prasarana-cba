@@ -25,12 +25,26 @@ Aplikasi ini terdiri dari modul utama yang saling terintegrasi:
     *   Halaman khusus untuk Admin menambah, mengubah, atau menghapus pengguna sistem.
     *   Pengaturan hak akses (Admin vs User).
 
+## 🔑 Demo Akses
+
+Anda dapat mencoba aplikasi ini dengan menggunakan akun demo berikut:
+
+**Role User (Petugas Maintenance):**
+* **Username:** `user`
+* **Password:** `user`
+*(Catatan: Role User hanya dapat mengisi data perawatan untuk bulan dan tahun berjalan. User tidak dapat mengedit atau menghapus data yang sudah disimpan).*
+
+**Role Admin:**
+* **Username:** `admin`
+* **Password:** `admin` *(atau password admin yang Anda set up)*
+*(Catatan: Admin memiliki hak penuh untuk mengedit semua data riwayat, menghapus data, dan mengelola user).*
+
 ## 🛡️ Keamanan Sistem
 
 Sistem ini telah ditingkatkan dengan standar keamanan produksi:
 *   **Password Hashing:** Menggunakan algoritma **BCrypt** untuk menyimpan password pengguna secara aman di database.
 *   **SQL Injection Prevention:** Semua input diproses menggunakan escaping untuk mencegah serangan injeksi SQL.
-*   **Role-Based Access Control (RBAC):** Hanya pengguna dengan peran **Admin** yang dapat menghapus data atau mengakses manajemen user.
+*   **Role-Based Access Control (RBAC):** Pemisahan hak akses secara ketat antara Admin dan User biasa.
 
 ## 🛠️ Teknologi yang Digunakan
 
@@ -102,4 +116,19 @@ checklist/
 ```
 
 ---
-**Team IT Pabrik - Sistem Sarana Prasarana**
+
+## 📜 Lisensi
+
+Project ini dilisensikan di bawah **MIT License**.
+
+Anda bebas menggunakan, menyalin, memodifikasi, dan mendistribusikan project ini selama mencantumkan nama pemilik hak cipta asli.
+
+Lihat file [LICENSE](LICENSE) untuk detail lengkap.
+
+---
+
+## 👨‍💻 Hak Cipta
+
+**© 2026 Team IT Pabrik CBA — Sistem Sarana Prasarana**
+
+> Seluruh kode sumber, desain antarmuka, dan dokumentasi pada repository ini adalah karya original dari **Team IT Pabrik CBA**. Dilarang keras mengklaim karya ini sebagai milik Anda sendiri tanpa izin tertulis dari pemilik hak cipta.

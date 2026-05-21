@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: May 13, 2026 at 09:18 AM
--- Server version: 10.11.10-MariaDB-log
--- PHP Version: 8.2.28
+-- Host: 127.0.0.1
+-- Generation Time: May 21, 2026 at 04:45 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -158,10 +158,18 @@ CREATE TABLE `checklist_apar` (
   `bambu_petunjuk` enum('Ok','Nok') DEFAULT NULL,
   `paraf` varchar(100) DEFAULT NULL,
   `catatan` text DEFAULT NULL,
-  `users_id` int(11) DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `users_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `checklist_apar`
+--
+
+INSERT INTO `checklist_apar` (`id`, `apar_id`, `tahun`, `bulan`, `tanggal_cek`, `label_pengisian`, `tekanan_pressure`, `safety_pin`, `handle`, `selang_nozzle`, `dry_chemical`, `tablulan`, `bambu_petunjuk`, `paraf`, `catatan`, `foto`, `users_id`, `created_at`) VALUES
+(11, 48, 2026, 1, '2026-05-12', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'sadas', 'APAR_48_2026_1_1778554951.png', 2, '2026-05-12 10:02:32'),
+(12, 48, 2026, 2, '2026-05-18', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'dasd', 'dasd', 'APAR_48_2026_2_1779077583.png', 1, '2026-05-18 11:13:04');
 
 -- --------------------------------------------------------
 
@@ -184,8 +192,8 @@ CREATE TABLE `checklist_gedung` (
   `lain_lain` enum('Ok','Nok') DEFAULT NULL,
   `paraf` varchar(100) DEFAULT NULL,
   `catatan` text DEFAULT NULL,
-  `users_id` int(11) DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `users_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -209,19 +217,10 @@ CREATE TABLE `checklist_grease_trap` (
   `bau_kontaminasi` enum('Ok','Nok') DEFAULT NULL,
   `paraf` varchar(100) DEFAULT NULL,
   `catatan` text DEFAULT NULL,
-  `users_id` int(11) DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `users_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `checklist_grease_trap`
---
-
-INSERT INTO `checklist_grease_trap` (`id`, `grease_trap_id`, `tahun`, `bulan`, `minggu`, `tanggal_cek`, `kondisi_fisik`, `kebersihan_internal`, `pemisahan_lemak`, `saluran_in_out`, `bau_kontaminasi`, `paraf`, `catatan`, `users_id`, `foto`, `created_at`) VALUES
-(8, 1, 2026, 5, 1, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'jhbj', 'gfdg', 1, 'GT_1_2026_5_1_1778572142.png', '2026-05-12 14:49:03'),
-(9, 1, 2026, 5, 2, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'tes', 'ghhh', 1, 'GT_1_2026_5_2_1778580191.PNG', '2026-05-12 17:02:41'),
-(10, 1, 2026, 1, 1, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'kurang tekanan', 2, 'GT_1_2026_1_1_1778580261.png', '2026-05-12 17:04:22');
 
 -- --------------------------------------------------------
 
@@ -244,19 +243,39 @@ CREATE TABLE `checklist_hydrant` (
   `box_hydrant` enum('Ok','Nok') DEFAULT NULL,
   `paraf` varchar(100) DEFAULT NULL,
   `catatan` text DEFAULT NULL,
-  `users_id` int(11) DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
+  `users_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `checklist_hydrant`
+-- Table structure for table `checklist_toilet`
 --
 
-INSERT INTO `checklist_hydrant` (`id`, `hydrant_id`, `tahun`, `bulan`, `tanggal_cek`, `valve_handle`, `hose_coupling_conect`, `baut_valve_handle`, `fire_hose`, `slang_hydrant`, `nozzle`, `box_hydrant`, `paraf`, `catatan`, `users_id`, `foto`, `created_at`) VALUES
-(6, 1, 2026, 5, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Kurang rapat ', 1, 'HYDRANT_1_2026_5_1778573070.png', '2026-05-12 13:58:03'),
-(7, 1, 2026, 6, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Andi', 'Kuran rapat ', 2, 'HYDRANT_1_2026_6_1778573311.jpg', '2026-05-12 15:08:31'),
-(8, 1, 2026, 4, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Andi', 'Yyy', 1, 'HYDRANT_1_2026_4_1778574202.jpg', '2026-05-12 15:23:22');
+CREATE TABLE `checklist_toilet` (
+  `id` int(11) NOT NULL,
+  `toilet_id` int(11) NOT NULL,
+  `tahun` int(4) NOT NULL,
+  `bulan` tinyint(2) NOT NULL,
+  `tanggal_cek` date DEFAULT NULL,
+  `tissue_toilet` enum('Ok','Nok') DEFAULT NULL,
+  `lantai_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `closet_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `dinding_bersih` enum('Ok','Nok') DEFAULT NULL,
+  `kran_shower` enum('Ok','Nok') DEFAULT NULL,
+  `sarang_laba` enum('Ok','Nok') DEFAULT NULL,
+  `tersedia_pewangi` enum('Ok','Nok') DEFAULT NULL,
+  `lap_sabun` enum('Ok','Nok') DEFAULT NULL,
+  `tempat_sampah` enum('Ok','Nok') DEFAULT NULL,
+  `matikan_lampu` enum('Ok','Nok') DEFAULT NULL,
+  `paraf` varchar(100) DEFAULT NULL,
+  `catatan` text DEFAULT NULL,
+  `foto` varchar(255) DEFAULT NULL,
+  `users_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -380,6 +399,116 @@ INSERT INTO `hydrant` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `master_item`
+--
+
+CREATE TABLE `master_item` (
+  `id` int(11) NOT NULL,
+  `modul` varchar(50) NOT NULL,
+  `kolom` varchar(100) NOT NULL,
+  `label` varchar(200) NOT NULL,
+  `is_active` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `master_item`
+--
+
+INSERT INTO `master_item` (`id`, `modul`, `kolom`, `label`, `is_active`) VALUES
+(1, 'apar', 'label_pengisian', 'Label pengisian ulang', 1),
+(2, 'apar', 'tekanan_pressure', 'Tekanan (pressure) Amper', 1),
+(3, 'apar', 'safety_pin', 'Safety pin', 1),
+(4, 'apar', 'handle', 'Handle', 1),
+(5, 'apar', 'selang_nozzle', 'Selang (Nozzle)', 1),
+(6, 'apar', 'dry_chemical', 'Dry Chemical', 1),
+(7, 'apar', 'tablulan', 'Tablulan', 1),
+(8, 'apar', 'bambu_petunjuk', 'Bambu & petunjuk penggunaan', 1),
+(9, 'hydrant', 'valve_handle', 'Valve Handle', 1),
+(10, 'hydrant', 'hose_coupling_conect', 'Hose Coupling Conect', 1),
+(11, 'hydrant', 'baut_valve_handle', 'Baut valve handle', 1),
+(12, 'hydrant', 'fire_hose', 'Fire hose', 1),
+(13, 'hydrant', 'slang_hydrant', 'Slang hydrant', 1),
+(14, 'hydrant', 'nozzle', 'Nozzle', 1),
+(15, 'hydrant', 'box_hydrant', 'Box Hydrant', 1),
+(16, 'gedung', 'dinding', 'Dinding', 1),
+(17, 'gedung', 'atap_talang', 'Atap/Talang', 1),
+(18, 'gedung', 'lantai', 'Lantai', 1),
+(19, 'gedung', 'wastafel', 'Wastafel', 1),
+(20, 'gedung', 'pintu_kaca', 'Pintu/Kaca', 1),
+(21, 'gedung', 'toilet', 'Toilet', 1),
+(22, 'gedung', 'lain_lain', 'Lain-lain', 1),
+(23, 'grease_trap', 'kondisi_fisik', 'Kondisi fisik grease trap', 1),
+(24, 'grease_trap', 'kebersihan_internal', 'Kebersihan internal', 1),
+(25, 'grease_trap', 'pemisahan_lemak', 'Fungsi pemisahan lemak', 1),
+(26, 'grease_trap', 'saluran_in_out', 'Saluran masuk dan keluar', 1),
+(27, 'grease_trap', 'bau_kontaminasi', 'Bau atau kontaminasi', 1),
+(28, 'toilet', 'item1', 'Tissue toilet selalu tersedia', 1),
+(29, 'toilet', 'item2', 'Lantai bersih (tidak ada sampah)', 1),
+(30, 'toilet', 'item3', 'Closet bersih & tidak mampet', 1),
+(31, 'toilet', 'item4', 'Dinding Toilet bersih', 1),
+(32, 'toilet', 'item5', 'Kran/shower berfungsi dengan baik', 1),
+(33, 'toilet', 'item6', 'Tidak ada sarang laba-laba', 1),
+(34, 'toilet', 'item7', 'Tersedia pewangi', 1),
+(35, 'toilet', 'item8', 'Ada lap tangan dan sabun di wastafel', 1),
+(36, 'toilet', 'item9', 'Ada tempat sampah di dalam toilet', 1),
+(37, 'toilet', 'item10', 'Matikan lampu toilet saat tidak digunakan', 1),
+(38, 'toilet', 'test', 'test', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `toilet_checks`
+--
+
+CREATE TABLE `toilet_checks` (
+  `id` int(11) NOT NULL,
+  `tanggal` date NOT NULL,
+  `lokasi` varchar(100) NOT NULL DEFAULT 'Toilet',
+  `item1` tinyint(1) NOT NULL DEFAULT 0,
+  `item2` tinyint(1) NOT NULL DEFAULT 0,
+  `item3` tinyint(1) NOT NULL DEFAULT 0,
+  `item4` tinyint(1) NOT NULL DEFAULT 0,
+  `item5` tinyint(1) NOT NULL DEFAULT 0,
+  `item6` tinyint(1) NOT NULL DEFAULT 0,
+  `item7` tinyint(1) NOT NULL DEFAULT 0,
+  `item8` tinyint(1) NOT NULL DEFAULT 0,
+  `item9` tinyint(1) NOT NULL DEFAULT 0,
+  `item10` tinyint(1) NOT NULL DEFAULT 0,
+  `notes` text DEFAULT NULL,
+  `created_by` varchar(100) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `toilet_checks`
+--
+
+INSERT INTO `toilet_checks` (`id`, `tanggal`, `lokasi`, `item1`, `item2`, `item3`, `item4`, `item5`, `item6`, `item7`, `item8`, `item9`, `item10`, `notes`, `created_by`, `created_at`) VALUES
+(1, '2026-05-01', 'Toilet', 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 'sdsasda', 'admin', '2026-05-20 16:26:44');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `toilet_unit`
+--
+
+CREATE TABLE `toilet_unit` (
+  `id` int(11) NOT NULL,
+  `no_kode` varchar(50) NOT NULL,
+  `nama_sarana` varchar(100) DEFAULT 'Toilet',
+  `lokasi` varchar(200) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `toilet_unit`
+--
+
+INSERT INTO `toilet_unit` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
+(1, 'TL-01', 'Toilet', 'Toilet Kantor Baru Lantai 1');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -399,8 +528,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `pass`, `nama`, `email`, `status`, `role`, `created_at`) VALUES
-(1, 'admin', 'admin', 'Administrator', 'admin@example.com', 'Aktif', 'Admin', '2026-05-04 10:28:55'),
-(2, 'user', 'user', 'User Biasa', 'user@example.com', 'Aktif', 'User', '2026-05-04 10:28:55');
+(1, 'admin', '$2y$10$OmD3oFkOLTeR3ch2rufGneLf3VfpcmmLAAZujf8ZgXiid0fF7UtKa', 'Administrator', 'admin@example.com', 'Aktif', 'Admin', '2026-05-04 10:28:55'),
+(2, 'user', '$2y$10$kosvdiXHU9mhSc2GkNtPTu3p17G63TmtONTgz.n20v4d7TOTGhDq6', 'User Biasa', 'user@example.com', 'Aktif', 'User', '2026-05-04 10:28:55'),
+(5, 'doelkussoy', '$2y$10$m9piukKmAzcMTf01CoEjee4pw9bE0dyT8rBD0uNlEeAgMRklMTNVi', NULL, NULL, 'Aktif', 'User', '2026-05-11 11:26:43'),
+(7, 'itcba', '$2y$10$XdqYZHURrXbx8s671xYtBu/alv5W7RKSPkBhTuVU2NYf0t13YHtnW', NULL, NULL, 'Aktif', 'Admin', '2026-05-11 11:29:32');
 
 --
 -- Indexes for dumped tables
@@ -437,6 +568,13 @@ ALTER TABLE `checklist_hydrant`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `checklist_toilet`
+--
+ALTER TABLE `checklist_toilet`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_toilet_date` (`toilet_id`,`tanggal_cek`);
+
+--
 -- Indexes for table `gedung`
 --
 ALTER TABLE `gedung`
@@ -452,6 +590,25 @@ ALTER TABLE `grease_trap`
 -- Indexes for table `hydrant`
 --
 ALTER TABLE `hydrant`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `master_item`
+--
+ALTER TABLE `master_item`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `toilet_checks`
+--
+ALTER TABLE `toilet_checks`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_date_location` (`tanggal`,`lokasi`);
+
+--
+-- Indexes for table `toilet_unit`
+--
+ALTER TABLE `toilet_unit`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -475,7 +632,7 @@ ALTER TABLE `apar`
 -- AUTO_INCREMENT for table `checklist_apar`
 --
 ALTER TABLE `checklist_apar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `checklist_gedung`
@@ -487,25 +644,31 @@ ALTER TABLE `checklist_gedung`
 -- AUTO_INCREMENT for table `checklist_grease_trap`
 --
 ALTER TABLE `checklist_grease_trap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `checklist_hydrant`
 --
 ALTER TABLE `checklist_hydrant`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `checklist_toilet`
+--
+ALTER TABLE `checklist_toilet`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `gedung`
 --
 ALTER TABLE `gedung`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `grease_trap`
 --
 ALTER TABLE `grease_trap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `hydrant`
@@ -514,10 +677,28 @@ ALTER TABLE `hydrant`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT for table `master_item`
+--
+ALTER TABLE `master_item`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
+-- AUTO_INCREMENT for table `toilet_checks`
+--
+ALTER TABLE `toilet_checks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `toilet_unit`
+--
+ALTER TABLE `toilet_unit`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

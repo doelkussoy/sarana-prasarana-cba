@@ -415,7 +415,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
         <i class="fa-solid fa-print me-1"></i>Cetak
       </button>
       <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
-        onclick="document.getElementById('modalIsian').classList.add('active');document.getElementById('editBulan').value=''">
+        onclick="bukaEdit(new Date().getMonth() + 1)">
         <i class="fa-solid fa-plus me-1"></i>Isi Perawatan
       </button>
     </div>
@@ -698,6 +698,23 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     var existingData = <?= json_encode($rows) ?>;
     var items = <?= json_encode(array_keys($items)) ?>;
     var isAdmin = <?= ($_SESSION['role'] ?? '') === 'Admin' ? 'true' : 'false' ?>;
+    // Restrict ordinary users to today only and visually lock fields
+    if (!isAdmin) {
+      var today = new Date().toISOString().split('T')[0];
+      var dateInput = document.getElementById('inputTgl');
+      if (dateInput) {
+        dateInput.setAttribute('min', today);
+        dateInput.setAttribute('max', today);
+        dateInput.setAttribute('readonly', 'readonly');
+        dateInput.style.pointerEvents = 'none';
+        dateInput.style.backgroundColor = '#e9ecef';
+      }
+      var bulanSelect = document.getElementById('bulanSelect');
+      if (bulanSelect) {
+        bulanSelect.style.pointerEvents = 'none';
+        bulanSelect.style.backgroundColor = '#e9ecef';
+      }
+    }
     var entityId = <?= $gedung_id ?>;
     var tahun = <?= $tahun ?>;
     var entityParam = 'gedung_id';
@@ -731,7 +748,13 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           banner.innerHTML = '<i class="fa-solid fa-lock me-1"></i><strong>Data sudah terisi.</strong> Bulan ini tidak dapat diisi ulang.<span id="linkHapus"></span>';
         }
       } else {
-        allInputs.forEach(function (el) { el.disabled = false; });
+        allInputs.forEach(function (el) { 
+          if (!isAdmin && (el.id === 'bulanSelect' || el.id === 'mingguSelect')) {
+            el.disabled = true;
+          } else {
+            el.disabled = false; 
+          }
+        });
         btnSimpan.style.display = '';
         banner.classList.add('d-none');
         banner.innerHTML = '<i class="fa-solid fa-lock me-1"></i><strong>Data sudah terisi.</strong> Bulan ini tidak dapat diisi ulang.<span id="linkHapus"></span>';
@@ -747,6 +770,20 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     }
 
     function bukaEdit(bulan) {
+      // Prevent normal users from editing past/future months
+      if (!isAdmin) {
+        var currentMonth = new Date().getMonth() + 1;
+        var currentYear = new Date().getFullYear();
+        if (bulan !== currentMonth || tahun !== currentYear) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Akses Dibatasi',
+            text: 'User biasa hanya dapat mengisi data untuk bulan dan tahun saat ini saja.',
+            confirmButtonColor: '#2563eb'
+          });
+          return;
+        }
+      }
       var modal = document.getElementById('modalIsian');
       modal.classList.add('active');
       document.getElementById('editBulan').value = bulan;
@@ -760,7 +797,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       });
       document.getElementById('inputParaf').value = '';
       document.getElementById('inputCatatan').value = '';
-      document.getElementById('inputTgl').value = '';
+      document.getElementById('inputTgl').value = new Date().toISOString().split('T')[0];
       if (existingData[bulan]) {
         var d = existingData[bulan];
         if (d.tanggal_cek) document.getElementById('inputTgl').value = d.tanggal_cek;
@@ -784,7 +821,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       });
       document.getElementById('inputParaf').value = '';
       document.getElementById('inputCatatan').value = '';
-      document.getElementById('inputTgl').value = '';
+      document.getElementById('inputTgl').value = new Date().toISOString().split('T')[0];
       if (bulan && existingData[bulan]) {
         var d = existingData[bulan];
         if (d.tanggal_cek) document.getElementById('inputTgl').value = d.tanggal_cek;

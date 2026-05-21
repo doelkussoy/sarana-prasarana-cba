@@ -660,6 +660,14 @@ while ($r = mysqli_fetch_assoc($res)) {
     var tahun = <?= $tahun ?>;
     var bulan = <?= $bulan ?>;
     var pageFile = 'toilet_kartu.php';
+    // Restrict ordinary users to today only visually
+    if (!isAdmin) {
+      var editTanggal = document.getElementById('editTanggal');
+      if (editTanggal) {
+        editTanggal.style.pointerEvents = 'none';
+        editTanggal.style.backgroundColor = '#e9ecef';
+      }
+    }
 
     function bukaKonfirmasiHapus(hapusId) {
       var url = pageFile + '?toilet_id=' + entityId + '&tahun=' + tahun + '&bulan=' + bulan + '&hapus=' + hapusId;
@@ -690,6 +698,13 @@ while ($r = mysqli_fetch_assoc($res)) {
         }
       } else {
         allInputs.forEach(function (el) { el.disabled = false; });
+        if (!isAdmin) {
+          var et = document.getElementById('editTanggal');
+          if(et) {
+            et.style.pointerEvents = 'none';
+            et.style.backgroundColor = '#e9ecef';
+          }
+        }
         btnSimpan.style.display = '';
         banner.classList.add('d-none');
       }
@@ -723,6 +738,20 @@ while ($r = mysqli_fetch_assoc($res)) {
     }
 
     function bukaEdit(tgl) {
+      if (!isAdmin) {
+        var currentMonth = new Date().getMonth() + 1;
+        var currentYear = new Date().getFullYear();
+        var currentDay = new Date().getDate();
+        if (tgl !== currentDay || bulan !== currentMonth || tahun !== currentYear) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Akses Dibatasi',
+            text: 'User biasa hanya dapat mengisi data untuk hari ini saja.',
+            confirmButtonColor: '#2563eb'
+          });
+          return;
+        }
+      }
       var modal = document.getElementById('modalIsian');
       modal.classList.add('active');
       cekSudahIsi(tgl);

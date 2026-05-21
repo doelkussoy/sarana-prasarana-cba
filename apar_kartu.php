@@ -40,6 +40,15 @@ if(mysqli_num_rows($resItems) == 0) {
 if (isset($_POST['simpan_checklist'])) {
   $bulan = (int) $_POST['bulan'];
   $tgl = mysqli_real_escape_string($conn, $_POST['tanggal_cek']);
+if (($_SESSION['role'] ?? '') !== 'Admin') {
+    $today = date('Y-m-d');
+    $currentBulan = (int)date('n');
+    $currentTahun = (int)date('Y');
+    if ($tgl !== $today || $bulan !== $currentBulan || $tahun !== $currentTahun) {
+        header("Location: apar_kartu.php?apar_id=$apar_id&tahun=$tahun&error=invalid_date");
+        exit;
+    }
+}
   $vals = [];
   foreach ($fields as $f) {
     $vals[$f] = isset($_POST[$f]) ? mysqli_real_escape_string($conn, $_POST[$f]) : null;
@@ -415,7 +424,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
         <i class="fa-solid fa-print me-1"></i>Cetak
       </button>
       <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
-        onclick="document.getElementById('modalIsian').classList.add('active');document.getElementById('editBulan').value=''">
+        onclick="bukaEdit(new Date().getMonth() + 1)">
         <i class="fa-solid fa-plus me-1"></i>Isi Perawatan
       </button>
     </div>
@@ -620,7 +629,8 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           </div>
           <div class="col-6">
             <label class="form-label fw-semibold small">Tanggal Cek <span class="text-danger">*</span></label>
-            <input type="date" class="form-control form-control-sm" name="tanggal_cek" id="inputTgl" required>
+            <input type="date" class="form-control form-control-sm" name="tanggal_cek" id="inputTgl" min="<?= date('Y-m-d') ?>" required>
+
           </div>
         </div>
 
@@ -698,11 +708,22 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     var existingData = <?= json_encode($rows) ?>;
     var items = <?= json_encode(array_keys($items)) ?>;
     var isAdmin = <?php echo ($_SESSION['role'] ?? '') === 'Admin' ? 'true' : 'false'; ?>;
-    // Restrict ordinary users to today and future dates
+    // Restrict ordinary users to today only and visually lock fields
     if (!isAdmin) {
       var today = new Date().toISOString().split('T')[0];
       var dateInput = document.getElementById('inputTgl');
-      if (dateInput) dateInput.setAttribute('min', today);
+      if (dateInput) {
+        dateInput.setAttribute('min', today);
+        dateInput.setAttribute('max', today);
+        dateInput.setAttribute('readonly', 'readonly');
+        dateInput.style.pointerEvents = 'none';
+        dateInput.style.backgroundColor = '#e9ecef';
+      }
+      var bulanSelect = document.getElementById('bulanSelect');
+      if (bulanSelect) {
+        bulanSelect.style.pointerEvents = 'none';
+        bulanSelect.style.backgroundColor = '#e9ecef';
+      }
     }
     var entityId = <?= $apar_id ?>;
     var tahun = <?= $tahun ?>;
@@ -736,7 +757,13 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           banner.innerHTML = '<i class="fa-solid fa-lock me-1"></i><strong>Data sudah terisi.</strong> Bulan ini tidak dapat diisi ulang.<span id="linkHapus"></span>';
         }
       } else {
-        allInputs.forEach(function (el) { el.disabled = false; });
+        allInputs.forEach(function (el) { 
+          if (!isAdmin && el.id === 'bulanSelect') {
+            el.disabled = true;
+          } else {
+            el.disabled = false; 
+          }
+        });
         btnSimpan.style.display = '';
         banner.classList.add('d-none');
         banner.innerHTML = '<i class="fa-solid fa-lock me-1"></i><strong>Data sudah terisi.</strong> Bulan ini tidak dapat diisi ulang.<span id="linkHapus"></span>';
@@ -752,35 +779,48 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     }
 
     function bukaEdit(bulan) {
-      // Prevent normal users from editing past dates
+      // Prevent normal users from editing past/future months
       if (!isAdmin) {
-        var selectedDate = new Date(tahun, bulan - 1, bulan);
-        var today = new Date();
-        today.setHours(0,0,0,0);
-        if (selectedDate < today) {
+        var currentMonth = new Date().getMonth() + 1;
+        var currentYear = new Date().getFullYear();
+        if (bulan !== currentMonth || tahun !== currentYear) {
           Swal.fire({
             icon: 'warning',
             title: 'Akses Dibatasi',
-            text: 'User biasa hanya dapat mengisi/mengubah data untuk hari ini dan kedepan.',
+            text: 'User biasa hanya dapat mengisi data untuk bulan dan tahun saat ini saja.',
+            confirmButtonColor: '#2563eb'
+          });
+          return;
+        }
+        // Prevent user from editing already-filled data
+        if (existingData[bulan]) {
+          Swal.fire({
+            icon: 'info',
+            title: 'Data Sudah Terisi',
+            text: 'Data bulan ini sudah diisi dan tidak dapat diedit. Hubungi Admin untuk mengubah data.',
             confirmButtonColor: '#2563eb'
           });
           return;
         }
       }
+
       var modal = document.getElementById('modalIsian');
       modal.classList.add('active');
       document.getElementById('editBulan').value = bulan;
       document.getElementById('bulanSelect').value = bulan;
       resetFoto(); // Reset preview saat buka modal
+      
       items.forEach(function (k) {
         var ok = document.getElementById(k + '_ok');
         var nok = document.getElementById(k + '_nok');
         if (ok) ok.checked = false;
         if (nok) nok.checked = false;
       });
+      
       document.getElementById('inputParaf').value = '';
       document.getElementById('inputCatatan').value = '';
-      document.getElementById('inputTgl').value = '';
+      document.getElementById('inputTgl').value = new Date().toISOString().split('T')[0];
+      
       if (existingData[bulan]) {
         var d = existingData[bulan];
         if (d.tanggal_cek) document.getElementById('inputTgl').value = d.tanggal_cek;
@@ -807,7 +847,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       });
       document.getElementById('inputParaf').value = '';
       document.getElementById('inputCatatan').value = '';
-      document.getElementById('inputTgl').value = '';
+      document.getElementById('inputTgl').value = new Date().toISOString().split('T')[0];
       if (bulan && existingData[bulan]) {
         var d = existingData[bulan];
         if (d.tanggal_cek) document.getElementById('inputTgl').value = d.tanggal_cek;

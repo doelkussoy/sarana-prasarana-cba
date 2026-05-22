@@ -11,7 +11,7 @@ $toilet_id = isset($_GET['toilet_id']) ? (int) $_GET['toilet_id'] : 0;
 $tahun = isset($_GET['tahun']) ? (int) $_GET['tahun'] : (int) date('Y');
 $bulan = isset($_GET['bulan']) ? (int) $_GET['bulan'] : (int) date('n');
 
-$daysInMonth = cal_days_in_month(CAL_GREGORIAN, $bulan, $tahun);
+$daysInMonth = date('t', mktime(0, 0, 0, $bulan, 1, $tahun));
 $bulanNama = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
 // Ambil data Toilet
@@ -53,6 +53,10 @@ if (mysqli_num_rows($resItems) == 0) {
 
 // Handle simpan perawatan
 if (isset($_POST['simpan_checklist'])) {
+  if (($_SESSION['role'] ?? '') === 'Monitoring') {
+    header("Location: toilet_kartu.php?toilet_id=$toilet_id&tahun=$tahun&bulan=$bulan");
+    exit;
+  }
   $tgl = (int) $_POST['tanggal'];
   $fullDate = "$tahun-" . str_pad($bulan, 2, '0', STR_PAD_LEFT) . "-" . str_pad($tgl, 2, '0', STR_PAD_LEFT);
   $vals = [];
@@ -147,6 +151,14 @@ while ($r = mysqli_fetch_assoc($res)) {
       --blue: #2563eb;
       --blue-dark: #1e3a8a;
       --blue-light: #3b82f6;
+    }
+
+    html,
+    body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden !important;
+      position: relative;
     }
 
     body {
@@ -278,6 +290,102 @@ while ($r = mysqli_fetch_assoc($res)) {
       overflow-y: auto;
     }
 
+    .mobile-scroll-hint {
+      display: none;
+      font-size: 11px;
+      color: var(--blue);
+      margin-bottom: 8px;
+      text-align: right;
+      font-style: italic;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .tbl-kartu .th-item {
+        min-width: 120px !important;
+        white-space: normal !important;
+        font-size: 10px !important;
+        padding-left: 5px !important;
+        line-height: 1.2;
+        border-right: 2px solid #1e3a8a !important;
+      }
+
+      .tbl-kartu th,
+      .tbl-kartu td {
+        padding: 4px 2px !important;
+        font-size: 10px !important;
+      }
+
+      .tbl-kartu .th-bulan {
+        min-width: 22px !important;
+        font-size: 10px !important;
+        padding: 2px !important;
+      }
+
+      .mobile-scroll-hint {
+        display: block !important;
+      }
+
+      .kartu-header {
+        padding: 15px 12px;
+      }
+
+      .kartu-body {
+        padding: 15px 12px;
+      }
+
+      .info-box {
+        padding: 10px;
+      }
+
+      .info-label {
+        font-size: 10px;
+      }
+
+      .info-val {
+        font-size: 13px;
+      }
+
+      .top-controls {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+
+      .top-controls>a.btn {
+        align-self: flex-start;
+      }
+
+      .top-controls form {
+        width: 100%;
+        margin-left: 0 !important;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .top-controls>button {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      .modal-box {
+        padding: 20px 15px;
+      }
+    }
+
     footer {
       background: linear-gradient(135deg, var(--blue-dark), var(--blue-light));
       color: #fff;
@@ -378,12 +486,13 @@ while ($r = mysqli_fetch_assoc($res)) {
 
     <div class="print-only-header">
       <div style="width:33%; text-align:left;"><?= date('d/m/Y, H:i') ?></div>
-      <div style="width:33%; text-align:center;">Kartu Riwayat Toilet - <?= htmlspecialchars($toiletRow['no_kode']) ?></div>
+      <div style="width:33%; text-align:center;">Kartu Riwayat Toilet - <?= htmlspecialchars($toiletRow['no_kode']) ?>
+      </div>
       <div style="width:33%; text-align:right;"></div>
     </div>
 
     <!-- Kontrol atas -->
-    <div class="d-flex flex-wrap gap-2 align-items-center mb-3 no-print">
+    <div class="d-flex flex-wrap gap-2 align-items-center mb-3 no-print top-controls">
       <a href="toilet_home.php" class="btn btn-sm btn-outline-secondary rounded-pill">
         <i class="fa-solid fa-arrow-left me-1"></i>Kembali
       </a>
@@ -405,10 +514,12 @@ while ($r = mysqli_fetch_assoc($res)) {
       <button class="btn btn-sm btn-success rounded-pill no-print" onclick="window.print()">
         <i class="fa-solid fa-print me-1"></i>Cetak
       </button>
-      <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
-        onclick="bukaEdit(<?= (int)date('j') ?>)">
-        <i class="fa-solid fa-plus me-1"></i>Isi Harian
-      </button>
+      <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
+        <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
+          onclick="bukaEdit(<?= (int) date('j') ?>)">
+          <i class="fa-solid fa-plus me-1"></i>Isi Harian
+        </button>
+      <?php endif; ?>
     </div>
 
     <!-- Kartu Riwayat -->
@@ -438,11 +549,16 @@ while ($r = mysqli_fetch_assoc($res)) {
             </div>
             <div class="col-12 col-md-4">
               <div class="info-label">Lokasi</div>
-              <div class="info-val"><i class="fa-solid fa-location-dot text-danger me-1"></i><?= htmlspecialchars($toiletRow['lokasi']) ?></div>
+              <div class="info-val"><i
+                  class="fa-solid fa-location-dot text-danger me-1"></i><?= htmlspecialchars($toiletRow['lokasi']) ?>
+              </div>
             </div>
           </div>
         </div>
 
+        <div class="mobile-scroll-hint">
+          <i class="fa-solid fa-arrows-left-right me-1"></i> Geser tabel ke kanan untuk melihat tanggal lainnya
+        </div>
         <div class="table-responsive" style="overflow-x: auto;">
           <table class="tbl-kartu">
             <thead>
@@ -464,13 +580,14 @@ while ($r = mysqli_fetch_assoc($res)) {
                     $r = $rows[$d] ?? null;
                     $val = $r ? $r[$key] : null;
                     ?>
-                    <td class="<?= $val == 'Ok' ? 'ok-cell' : ($val == 'Nok' ? 'nok-cell' : '') ?>" style="font-size:12px; padding:2px;">
+                    <td class="<?= $val == 'Ok' ? 'ok-cell' : ($val == 'Nok' ? 'nok-cell' : '') ?>"
+                      style="font-size:12px; padding:2px;">
                       <?= $val == 'Ok' ? '✓' : ($val == 'Nok' ? '✗' : '') ?>
                     </td>
                   <?php endfor; ?>
                 </tr>
               <?php endforeach; ?>
-              
+
               <!-- Paraf -->
               <tr>
                 <td colspan="2" class="th-item fw-bold">Paraf Pemeriksa</td>
@@ -483,7 +600,7 @@ while ($r = mysqli_fetch_assoc($res)) {
                   </td>
                 <?php endfor; ?>
               </tr>
-              
+
               <!-- Foto -->
               <tr class="no-print">
                 <td colspan="2" class="th-item fw-bold">Foto Bukti</td>
@@ -493,27 +610,32 @@ while ($r = mysqli_fetch_assoc($res)) {
                   ?>
                   <td class="text-center" style="padding: 2px;">
                     <?php if ($foto): ?>
-                      <i class="fa-solid fa-image text-primary" style="cursor:pointer;" title="Lihat Foto" onclick="previewFoto('uploads/<?= $foto ?>')"></i>
+                      <i class="fa-solid fa-image text-primary" style="cursor:pointer;" title="Lihat Foto"
+                        onclick="previewFoto('uploads/<?= $foto ?>')"></i>
                     <?php else: ?>
                       <span class="empty-cell" style="font-size:9px">-</span>
                     <?php endif; ?>
                   </td>
                 <?php endfor; ?>
               </tr>
-              
+
               <!-- Aksi Edit -->
-              <tr class="no-print">
-                <td colspan="2" class="th-item fw-bold" style="background:#f8f9fa; color:#333;">Aksi</td>
-                <?php for ($d = 1; $d <= $daysInMonth; $d++):
-                  $isFilled = isset($rows[$d]);
-                  ?>
-                  <td class="text-center" style="padding: 2px;">
-                    <button class="btn btn-sm <?= $isFilled ? 'btn-success' : 'btn-outline-secondary' ?>" style="padding: 1px 4px; font-size: 10px;" onclick="bukaEdit(<?= $d ?>)" title="<?= $isFilled ? 'Edit' : 'Isi' ?>">
-                      <i class="fa-solid <?= $isFilled ? 'fa-pen' : 'fa-plus' ?>"></i>
-                    </button>
-                  </td>
-                <?php endfor; ?>
-              </tr>
+              <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
+                <tr class="no-print">
+                  <td colspan="2" class="th-item fw-bold" style="background:#f8f9fa; color:#333;">Aksi</td>
+                  <?php for ($d = 1; $d <= $daysInMonth; $d++):
+                    $isFilled = isset($rows[$d]);
+                    ?>
+                    <td class="text-center" style="padding: 2px;">
+                      <button class="btn btn-sm <?= $isFilled ? 'btn-success' : 'btn-outline-secondary' ?>"
+                        style="padding: 1px 4px; font-size: 10px;" onclick="bukaEdit(<?= $d ?>)"
+                        title="<?= $isFilled ? 'Edit' : 'Isi' ?>">
+                        <i class="fa-solid <?= $isFilled ? 'fa-pen' : 'fa-plus' ?>"></i>
+                      </button>
+                    </td>
+                  <?php endfor; ?>
+                </tr>
+              <?php endif; ?>
             </tbody>
           </table>
         </div>
@@ -524,12 +646,13 @@ while ($r = mysqli_fetch_assoc($res)) {
           <div class="row g-2">
             <?php for ($d = 1; $d <= $daysInMonth; $d++):
               $cat = isset($rows[$d]) ? $rows[$d]['catatan'] : '';
-              if (!$cat) continue;
+              if (!$cat)
+                continue;
               ?>
               <div class="col-12 col-md-6 col-lg-4">
                 <div class="d-flex gap-2 align-items-start">
                   <span class="fw-semibold small" style="min-width:40px">Tgl <?= $d ?>:</span>
-                  <span class="small text-secondary" style="border-bottom:1px solid #ccc;flex:1;min-height:20px">
+                  <span class="small text-secondary" style="border-bottom:1px solid #ccc;flex:1;min-height:20px;word-break:break-word;overflow-wrap:break-word;">
                     <?= htmlspecialchars($cat) ?>
                   </span>
                 </div>
@@ -545,7 +668,8 @@ while ($r = mysqli_fetch_assoc($res)) {
   <!-- Modal Konfirmasi Hapus -->
   <div class="modal-overlay" id="modalKonfirmasiHapus" style="z-index:1100">
     <div class="modal-box" style="max-width:420px;text-align:center;padding:36px 32px">
-      <div style="width:70px;height:70px;background:linear-gradient(135deg,#fee2e2,#fecaca);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <div
+        style="width:70px;height:70px;background:linear-gradient(135deg,#fee2e2,#fecaca);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
         <i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:#dc2626"></i>
       </div>
       <h5 class="fw-bold mb-2" style="color:#1e293b;font-size:18px">Hapus Data Ini?</h5>
@@ -553,7 +677,8 @@ while ($r = mysqli_fetch_assoc($res)) {
         Data perawatan tanggal ini akan <strong>dihapus permanen</strong> dan tidak dapat dikembalikan.
       </p>
       <div class="d-flex gap-3 justify-content-center">
-        <button type="button" class="btn btn-secondary px-4" onclick="document.getElementById('modalKonfirmasiHapus').classList.remove('active')">
+        <button type="button" class="btn btn-secondary px-4"
+          onclick="document.getElementById('modalKonfirmasiHapus').classList.remove('active')">
           <i class="fa-solid fa-xmark me-1"></i>Batal
         </button>
         <a id="btnKonfirmasiHapusLink" href="#" class="btn btn-danger px-4">
@@ -573,8 +698,9 @@ while ($r = mysqli_fetch_assoc($res)) {
         <button class="btn-close" onclick="document.getElementById('modalIsian').classList.remove('active')"></button>
       </div>
       <hr class="mt-1">
-      
-      <div id="bannerSudahIsi" class="alert alert-warning d-none py-2 px-3 mb-2" style="font-size:13px;border-radius:8px">
+
+      <div id="bannerSudahIsi" class="alert alert-warning d-none py-2 px-3 mb-2"
+        style="font-size:13px;border-radius:8px">
         <i class="fa-solid fa-lock me-1"></i>
         <strong>Data sudah terisi.</strong> Tanggal ini tidak dapat diisi ulang.
         <span id="linkHapus"></span>
@@ -582,14 +708,15 @@ while ($r = mysqli_fetch_assoc($res)) {
 
       <form method="POST" id="formPerawatan" enctype="multipart/form-data">
         <input type="hidden" name="simpan_checklist" value="1">
-        
+
         <div class="row g-3 mb-3">
           <div class="col-12">
             <label class="form-label fw-semibold small">Tanggal Cek <span class="text-danger">*</span></label>
-            <select class="form-select form-select-sm" name="tanggal" id="editTanggal" required onchange="cekSudahIsi(this.value)">
+            <select class="form-select form-select-sm" name="tanggal" id="editTanggal" required
+              onchange="cekSudahIsi(this.value)">
               <option value="">-- Pilih Tanggal --</option>
               <?php for ($d = 1; $d <= $daysInMonth; $d++): ?>
-                <option value="<?= $d ?>"><?= $d ?> <?= $bulanNama[$bulan] ?> <?= $tahun ?></option>
+                <option value="<?= $d ?>"><?= $d ?>   <?= $bulanNama[$bulan] ?>   <?= $tahun ?></option>
               <?php endfor; ?>
             </select>
           </div>
@@ -625,11 +752,13 @@ while ($r = mysqli_fetch_assoc($res)) {
         <div class="row g-3 mb-3">
           <div class="col-6">
             <label class="form-label fw-semibold small">Paraf Pemeriksa <span class="text-danger">*</span></label>
-            <input type="text" class="form-control form-control-sm" name="paraf" id="inputParaf" placeholder="Nama / Paraf">
+            <input type="text" class="form-control form-control-sm" name="paraf" id="inputParaf"
+              placeholder="Nama / Paraf">
           </div>
           <div class="col-6">
             <label class="form-label fw-semibold small">Catatan</label>
-            <input type="text" class="form-control form-control-sm" name="catatan" id="inputCatatan" placeholder="Catatan tambahan">
+            <input type="text" class="form-control form-control-sm" name="catatan" id="inputCatatan"
+              placeholder="Catatan tambahan">
           </div>
           <div class="col-12 mt-0">
             <label class="form-label fw-semibold small">Foto Bukti <span class="text-danger">*</span></label>
@@ -639,10 +768,12 @@ while ($r = mysqli_fetch_assoc($res)) {
         </div>
 
         <div class="d-flex gap-2">
-          <button type="button" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff" onclick="validasiDanSimpan()">
+          <button type="button" id="btnSimpan" class="btn flex-grow-1" style="background:var(--blue);color:#fff"
+            onclick="validasiDanSimpan()">
             <i class="fa-solid fa-save me-1"></i>Simpan
           </button>
-          <button type="button" class="btn btn-secondary" onclick="document.getElementById('modalIsian').classList.remove('active')">Batal</button>
+          <button type="button" class="btn btn-secondary"
+            onclick="document.getElementById('modalIsian').classList.remove('active')">Batal</button>
         </div>
       </form>
     </div>
@@ -700,7 +831,7 @@ while ($r = mysqli_fetch_assoc($res)) {
         allInputs.forEach(function (el) { el.disabled = false; });
         if (!isAdmin) {
           var et = document.getElementById('editTanggal');
-          if(et) {
+          if (et) {
             et.style.pointerEvents = 'none';
             et.style.backgroundColor = '#e9ecef';
           }
@@ -763,18 +894,18 @@ while ($r = mysqli_fetch_assoc($res)) {
         return;
       }
       var adaKosong = false;
-      items.forEach(function(k){
-        if(!document.getElementById(k+'_ok').checked && !document.getElementById(k+'_nok').checked) {
+      items.forEach(function (k) {
+        if (!document.getElementById(k + '_ok').checked && !document.getElementById(k + '_nok').checked) {
           adaKosong = true;
         }
       });
-      if(adaKosong) {
-         Swal.fire('Error', 'Harap isi semua item pengecekan (Ok/Nok)', 'error');
-         return;
+      if (adaKosong) {
+        Swal.fire('Error', 'Harap isi semua item pengecekan (Ok/Nok)', 'error');
+        return;
       }
-      if(!document.getElementById('inputParaf').value) {
-         Swal.fire('Error', 'Paraf pemeriksa wajib diisi', 'error');
-         return;
+      if (!document.getElementById('inputParaf').value) {
+        Swal.fire('Error', 'Paraf pemeriksa wajib diisi', 'error');
+        return;
       }
       var tgl = document.getElementById('editTanggal').value;
       var file = document.getElementById('inputFoto').files[0];
@@ -794,8 +925,17 @@ while ($r = mysqli_fetch_assoc($res)) {
         showConfirmButton: false,
         width: 'auto',
         padding: '1rem',
+        imageWidth: 400,
+        imageHeight: 400,
         customClass: {
           image: 'rounded'
+        },
+        didOpen: () => {
+          const img = Swal.getImage();
+          if (img) {
+            img.style.objectFit = 'contain';
+            img.style.backgroundColor = '#f8f9fa';
+          }
         }
       });
     }
@@ -809,4 +949,5 @@ while ($r = mysqli_fetch_assoc($res)) {
     <?php endif; ?>
   </script>
 </body>
+
 </html>

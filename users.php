@@ -64,7 +64,7 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
       --blue-dark: #1e3a8a;
       --blue-light: #3b82f6;
     }
-    body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
     .navbar { background: linear-gradient(135deg, var(--blue-dark), var(--blue-light)); }
     .card { border: none; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
     .table thead { background: #f8fafc; }
@@ -79,6 +79,12 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
       .navbar-brand span { font-size: 16px !important; }
       .card { padding: 20px !important; }
       .container { margin-top: 90px !important; }
+    }
+    
+    footer {
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue-light));
+      color: #fff;
+      margin-top: auto;
     }
   </style>
 
@@ -131,6 +137,7 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
               <select name="role" class="form-select form-select-md rounded-3" required>
                 <option value="User">User (Input Saja)</option>
                 <option value="Admin">Admin (Full Akses)</option>
+                <option value="Monitoring">Monitoring (Lihat Saja)</option>
               </select>
             </div>
             <button type="submit" name="tambah_user" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm rounded-3">
@@ -163,7 +170,7 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
                   <td><?= $no++ ?></td>
                   <td class="fw-bold text-dark"><?= htmlspecialchars($u['username']) ?></td>
                   <td>
-                    <span class="badge <?= $u['role'] == 'Admin' ? 'bg-primary' : 'bg-secondary' ?> rounded-pill px-3 py-1.5">
+                    <span class="badge <?= $u['role'] == 'Admin' ? 'bg-primary' : ($u['role'] == 'Monitoring' ? 'bg-info text-dark' : 'bg-secondary') ?> rounded-pill px-3 py-1.5">
                       <?= $u['role'] ?>
                     </span>
                   </td>
@@ -186,6 +193,10 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
     </div>
   </div>
 
+  <footer class="py-3 text-center">
+    &copy; <?= date('Y') ?> - Manajemen User | Team IT Pabrik
+  </footer>
+
   <script>
     function confirmDelete(id) {
       Swal.fire({
@@ -205,7 +216,7 @@ $listUsers = mysqli_query($conn, "SELECT * FROM users WHERE role != 'superadmin'
 
     // Notifikasi SweetAlert
     <?php if(isset($_GET['success'])): ?>
-      Swal.fire('Berhasil!', 'Operasi berhasil dilakukan.', 'success');
+      Swal.fire('Berhasil!', 'User berhasil ditambahkan.', 'success');
     <?php endif; ?>
     <?php if(isset($_GET['error'])): ?>
       Swal.fire('Error!', '<?= $_GET['error'] == 'exists' ? "Username sudah terdaftar!" : "Terjadi kesalahan!" ?>', 'error');

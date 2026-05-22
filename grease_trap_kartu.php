@@ -21,23 +21,27 @@ if (!$grease_trapRow) {
 $items = [];
 $fields = [];
 $resItems = mysqli_query($conn, "SELECT kolom, label FROM master_item WHERE modul='grease_trap' AND is_active=1 ORDER BY id ASC");
-if(mysqli_num_rows($resItems) == 0) {
-    // Fallback seed (jika master_item belum pernah dibuka sama sekali)
-    $defaultGreaseTrap = ['kondisi_fisik' => 'Kondisi fisik grease trap','kebersihan_internal' => 'Kebersihan internal','pemisahan_lemak' => 'Fungsi pemisahan lemak','saluran_in_out' => 'Saluran masuk dan keluar','bau_kontaminasi' => 'Bau atau kontaminasi'];
-    foreach($defaultGreaseTrap as $k => $l) {
-        mysqli_query($conn, "INSERT IGNORE INTO master_item (modul, kolom, label, is_active) VALUES ('grease_trap', '$k', '$l', 1)");
-        $items[$k] = $l;
-        $fields[] = $k;
-    }
+if (mysqli_num_rows($resItems) == 0) {
+  // Fallback seed (jika master_item belum pernah dibuka sama sekali)
+  $defaultGreaseTrap = ['kondisi_fisik' => 'Kondisi fisik grease trap', 'kebersihan_internal' => 'Kebersihan internal', 'pemisahan_lemak' => 'Fungsi pemisahan lemak', 'saluran_in_out' => 'Saluran masuk dan keluar', 'bau_kontaminasi' => 'Bau atau kontaminasi'];
+  foreach ($defaultGreaseTrap as $k => $l) {
+    mysqli_query($conn, "INSERT IGNORE INTO master_item (modul, kolom, label, is_active) VALUES ('grease_trap', '$k', '$l', 1)");
+    $items[$k] = $l;
+    $fields[] = $k;
+  }
 } else {
-    while ($rItem = mysqli_fetch_assoc($resItems)) {
-        $items[$rItem['kolom']] = $rItem['label'];
-        $fields[] = $rItem['kolom'];
-    }
+  while ($rItem = mysqli_fetch_assoc($resItems)) {
+    $items[$rItem['kolom']] = $rItem['label'];
+    $fields[] = $rItem['kolom'];
+  }
 }
 
 // Handle simpan perawatan
 if (isset($_POST['simpan_checklist'])) {
+  if (($_SESSION['role'] ?? '') === 'Monitoring') {
+    header("Location: grease_trap_kartu.php?grease_trap_id=$grease_trap_id&tahun=$tahun");
+    exit;
+  }
   $bulan = (int) $_POST['bulan'];
   $minggu = (int) ($_POST['minggu'] ?? 1);
   $tgl = mysqli_real_escape_string($conn, $_POST['tanggal_cek']);
@@ -90,15 +94,15 @@ if (isset($_POST['simpan_checklist'])) {
   } else {
     // Build insert string dinamis berdasarkan fields yang ada di master_item
     $fStr = "grease_trap_id,tahun,bulan,minggu,tanggal_cek," . implode(',', $fields) . ",paraf,catatan,users_id,foto";
-    
+
     $vArr = [];
     foreach ($fields as $f) {
       $vArr[] = $vals[$f] ? "'{$vals[$f]}'" : 'NULL';
     }
-    
+
     $ft = $foto_name ? "'$foto_name'" : 'NULL';
     $vStr = "$grease_trap_id,$tahun,$bulan,$minggu,'$tgl'," . implode(',', $vArr) . ",'$paraf','$catatan',$uid,$ft";
-    
+
     mysqli_query($conn, "INSERT INTO checklist_grease_trap ($fStr) VALUES ($vStr)");
   }
   header("Location: grease_trap_kartu.php?grease_trap_id=$grease_trap_id&tahun=$tahun");
@@ -144,6 +148,14 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       --blue: #2563eb;
       --blue-dark: #1e3a8a;
       --blue-light: #3b82f6;
+    }
+
+    html,
+    body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden !important;
+      position: relative;
     }
 
     body {
@@ -217,6 +229,9 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       text-align: left;
       padding-left: 10px;
       white-space: nowrap;
+      position: sticky;
+      left: 0;
+      z-index: 2;
     }
 
     .tbl-kartu .th-bulan {
@@ -288,6 +303,102 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
     .form-check-label {
       font-size: 13px;
+    }
+
+    .mobile-scroll-hint {
+      display: none;
+      font-size: 11px;
+      color: var(--blue);
+      margin-bottom: 8px;
+      text-align: right;
+      font-style: italic;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .tbl-kartu .th-item {
+        min-width: 120px !important;
+        white-space: normal !important;
+        font-size: 10px !important;
+        padding-left: 5px !important;
+        line-height: 1.2;
+        border-right: 2px solid #1e3a8a !important;
+      }
+
+      .tbl-kartu th,
+      .tbl-kartu td {
+        padding: 4px 2px !important;
+        font-size: 10px !important;
+      }
+
+      .tbl-kartu .th-bulan {
+        min-width: 22px !important;
+        font-size: 10px !important;
+        padding: 2px !important;
+      }
+
+      .mobile-scroll-hint {
+        display: block !important;
+      }
+
+      .kartu-header {
+        padding: 15px 12px;
+      }
+
+      .kartu-body {
+        padding: 15px 12px;
+      }
+
+      .info-box {
+        padding: 10px;
+      }
+
+      .info-label {
+        font-size: 10px;
+      }
+
+      .info-val {
+        font-size: 13px;
+      }
+
+      .top-controls {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+
+      .top-controls>a.btn {
+        align-self: flex-start;
+      }
+
+      .top-controls form {
+        width: 100%;
+        margin-left: 0 !important;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .top-controls>button {
+        width: 100%;
+        margin-top: 5px;
+      }
+
+      .modal-box {
+        padding: 20px 15px;
+      }
     }
 
     footer {
@@ -451,10 +562,12 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       <button class="btn btn-sm btn-success rounded-pill no-print" onclick="window.print()">
         <i class="fa-solid fa-print me-1"></i>Cetak
       </button>
-      <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
-        onclick="bukaEdit(new Date().getMonth() + 1)">
-        <i class="fa-solid fa-plus me-1"></i>Isi Perawatan
-      </button>
+      <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
+        <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
+          onclick="bukaEdit(new Date().getMonth() + 1)">
+          <i class="fa-solid fa-plus me-1"></i>Isi Perawatan
+        </button>
+      <?php endif; ?>
     </div>
 
     <!-- Kartu Riwayat -->
@@ -503,12 +616,15 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
             </div>
           </div>
           <div class="fw-bold mb-2 text-primary semester-title">SEMESTER 1 (JANUARI - JUNI)</div>
+          <div class="mobile-scroll-hint">
+            <i class="fa-solid fa-arrows-left-right me-1"></i> Geser tabel ke kanan untuk melihat minggu lainnya
+          </div>
           <div class="table-responsive">
             <table class="tbl-kartu">
               <thead>
                 <tr>
-                  <th rowspan="3" style="width:30px">NO</th>
-                  <th rowspan="3" class="th-item" style="min-width:180px">PENGECEKAN</th>
+                  <th rowspan="2" style="width:30px">NO</th>
+                  <th rowspan="2" class="th-item" style="min-width:180px">PENGECEKAN</th>
                   <?php
                   $monthWeeks = [1 => 5, 2 => 5, 3 => 5, 4 => 5, 5 => 5, 6 => 5, 7 => 5, 8 => 5, 9 => 5, 10 => 5, 11 => 5, 12 => 5];
                   for ($b = 1; $b <= 6; $b++): ?>
@@ -523,13 +639,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
                       <th style="background:var(--blue-dark);color:#fff;font-size:10px"><?= $wRom[$w] ?></th>
                     <?php endfor; endfor; ?>
                 </tr>
-                <tr>
-                  <?php for ($b = 1; $b <= 6; $b++):
-                    for ($w = 1; $w <= $monthWeeks[$b]; $w++):
-                      ?>
-                      <th style="background:var(--blue-dark);color:#fff;font-size:9px">Tgl</th>
-                    <?php endfor; endfor; ?>
-                </tr>
+
               </thead>
               <tbody>
                 <?php $no = 1;
@@ -551,6 +661,20 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
                     <?php endfor; ?>
                   </tr>
                 <?php endforeach; ?>
+                <!-- Baris Tanggal Cek -->
+                <tr>
+                  <td colspan="2" class="th-item fw-bold">Tanggal Cek</td>
+                  <?php for ($b = 1; $b <= 6; $b++):
+                    for ($w = 1; $w <= $monthWeeks[$b]; $w++):
+                      $r = $rows[$b][$w] ?? null;
+                      $tglCek = $r ? date('d/m', strtotime($r['tanggal_cek'])) : '';
+                      ?>
+                      <td style="font-size:9px">
+                        <?= $tglCek ?: '<span class="empty-cell">...</span>' ?>
+                      </td>
+                    <?php endfor; ?>
+                  <?php endfor; ?>
+                </tr>
                 <!-- Baris Paraf -->
                 <tr>
                   <td colspan="2" class="th-item fw-bold">Pemeriksa</td>
@@ -624,12 +748,15 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
             </div>
           </div>
           <div class="fw-bold mb-2 text-primary semester-title">SEMESTER 2 (JULI - DESEMBER)</div>
+          <div class="mobile-scroll-hint">
+            <i class="fa-solid fa-arrows-left-right me-1"></i> Geser tabel ke kanan untuk melihat minggu lainnya
+          </div>
           <div class="table-responsive">
             <table class="tbl-kartu">
               <thead>
                 <tr>
-                  <th rowspan="3" style="width:30px">NO</th>
-                  <th rowspan="3" class="th-item" style="min-width:180px">PENGECEKAN</th>
+                  <th rowspan="2" style="width:30px">NO</th>
+                  <th rowspan="2" class="th-item" style="min-width:180px">PENGECEKAN</th>
                   <?php for ($b = 7; $b <= 12; $b++): ?>
                     <th colspan="<?= $monthWeeks[$b] ?>" class="th-bulan"><?= strtoupper($bulanNamaFull[$b]) ?></th>
                   <?php endfor; ?>
@@ -642,13 +769,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
                       <th style="background:var(--blue-dark);color:#fff;font-size:10px"><?= $wRom[$w] ?></th>
                     <?php endfor; endfor; ?>
                 </tr>
-                <tr>
-                  <?php for ($b = 7; $b <= 12; $b++):
-                    for ($w = 1; $w <= $monthWeeks[$b]; $w++):
-                      ?>
-                      <th style="background:var(--blue-dark);color:#fff;font-size:9px">Tgl</th>
-                    <?php endfor; endfor; ?>
-                </tr>
+
               </thead>
               <tbody>
                 <?php $no = 1;
@@ -670,6 +791,20 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
                     <?php endfor; ?>
                   </tr>
                 <?php endforeach; ?>
+                <!-- Baris Tanggal Cek -->
+                <tr>
+                  <td colspan="2" class="th-item fw-bold">Tanggal Cek</td>
+                  <?php for ($b = 7; $b <= 12; $b++):
+                    for ($w = 1; $w <= $monthWeeks[$b]; $w++):
+                      $r = $rows[$b][$w] ?? null;
+                      $tglCek = $r ? date('d/m', strtotime($r['tanggal_cek'])) : '';
+                      ?>
+                      <td style="font-size:9px">
+                        <?= $tglCek ?: '<span class="empty-cell">...</span>' ?>
+                      </td>
+                    <?php endfor; ?>
+                  <?php endfor; ?>
+                </tr>
                 <!-- Baris Paraf -->
                 <tr>
                   <td colspan="2" class="th-item fw-bold">Pemeriksa</td>
@@ -752,7 +887,8 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
               <div class="col-6 col-md-3 col-lg-2">
                 <div class="d-flex gap-2 align-items-start">
                   <span class="fw-semibold small" style="min-width:28px"><?= $nm ?> :</span>
-                  <span class="small text-secondary" style="border-bottom:1px solid #ccc;flex:1;min-height:20px">
+                  <span class="small text-secondary"
+                    style="border-bottom:1px solid #ccc;flex:1;min-height:20px;word-break:break-word;overflow-wrap:break-word;">
                     <?= $cat ? htmlspecialchars($cat) : '' ?>
                   </span>
                 </div>
@@ -761,40 +897,42 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           </div>
         </div>
 
-        <!-- Tombol Aksi per Bulan -->
-        <div class="mt-3 no-print">
-          <div class="fw-semibold mb-2 text-secondary small">Kelola Perawatan per Minggu:</div>
-          <div class="row g-2">
-            <div class="col-12 col-md-6">
-              <?php for ($b = 1; $b <= 6; $b++): ?>
-                <div class="d-flex flex-wrap gap-1 mb-2">
-                  <span class="small fw-bold me-2" style="width:40px"><?= $bulanNama[$b] ?>:</span>
-                  <?php for ($w = 1; $w <= $monthWeeks[$b]; $w++): ?>
-                    <button
-                      class="btn btn-xs <?= isset($rows[$b][$w]) ? 'btn-success' : 'btn-outline-secondary' ?> py-0 px-2"
-                      style="font-size:10px" onclick="bukaEdit(<?= $b ?>, <?= $w ?>)" <?= (isset($rows[$b][$w]) && ($_SESSION['role'] ?? '') !== 'Admin') ? 'disabled' : '' ?>>
-                      W<?= $w ?> <?= isset($rows[$b][$w]) ? '✓' : '' ?>
-                    </button>
-                  <?php endfor; ?>
-                </div>
-              <?php endfor; ?>
-            </div>
-            <div class="col-12 col-md-6">
-              <?php for ($b = 7; $b <= 12; $b++): ?>
-                <div class="d-flex flex-wrap gap-1 mb-2">
-                  <span class="small fw-bold me-2" style="width:40px"><?= $bulanNama[$b] ?>:</span>
-                  <?php for ($w = 1; $w <= $monthWeeks[$b]; $w++): ?>
-                    <button
-                      class="btn btn-xs <?= isset($rows[$b][$w]) ? 'btn-success' : 'btn-outline-secondary' ?> py-0 px-2"
-                      style="font-size:10px" onclick="bukaEdit(<?= $b ?>, <?= $w ?>)">
-                      W<?= $w ?> <?= isset($rows[$b][$w]) ? '✓' : '' ?>
-                    </button>
-                  <?php endfor; ?>
-                </div>
-              <?php endfor; ?>
+        <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
+          <!-- Tombol Aksi per Bulan -->
+          <div class="mt-3 no-print">
+            <div class="fw-semibold mb-2 text-secondary small">Kelola Perawatan per Minggu:</div>
+            <div class="row g-2">
+              <div class="col-12 col-md-6">
+                <?php for ($b = 1; $b <= 6; $b++): ?>
+                  <div class="d-flex flex-wrap gap-1 mb-2">
+                    <span class="small fw-bold me-2" style="width:40px"><?= $bulanNama[$b] ?>:</span>
+                    <?php for ($w = 1; $w <= $monthWeeks[$b]; $w++): ?>
+                      <button
+                        class="btn btn-xs <?= isset($rows[$b][$w]) ? 'btn-success' : 'btn-outline-secondary' ?> py-0 px-2"
+                        style="font-size:10px" onclick="bukaEdit(<?= $b ?>, <?= $w ?>)" <?= (isset($rows[$b][$w]) && ($_SESSION['role'] ?? '') !== 'Admin') ? 'disabled' : '' ?>>
+                        W<?= $w ?>       <?= isset($rows[$b][$w]) ? '✓' : '' ?>
+                      </button>
+                    <?php endfor; ?>
+                  </div>
+                <?php endfor; ?>
+              </div>
+              <div class="col-12 col-md-6">
+                <?php for ($b = 7; $b <= 12; $b++): ?>
+                  <div class="d-flex flex-wrap gap-1 mb-2">
+                    <span class="small fw-bold me-2" style="width:40px"><?= $bulanNama[$b] ?>:</span>
+                    <?php for ($w = 1; $w <= $monthWeeks[$b]; $w++): ?>
+                      <button
+                        class="btn btn-xs <?= isset($rows[$b][$w]) ? 'btn-success' : 'btn-outline-secondary' ?> py-0 px-2"
+                        style="font-size:10px" onclick="bukaEdit(<?= $b ?>, <?= $w ?>)">
+                        W<?= $w ?>       <?= isset($rows[$b][$w]) ? '✓' : '' ?>
+                      </button>
+                    <?php endfor; ?>
+                  </div>
+                <?php endfor; ?>
+              </div>
             </div>
           </div>
-        </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
@@ -991,11 +1129,11 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           banner.innerHTML = '<i class="fa-solid fa-lock me-1"></i><strong>Data sudah terisi.</strong> Minggu ini tidak dapat diisi ulang.<span id="linkHapus"></span>';
         }
       } else {
-        allInputs.forEach(function (el) { 
+        allInputs.forEach(function (el) {
           if (!isAdmin && (el.id === 'bulanSelect' || el.id === 'mingguSelect')) {
             el.disabled = true;
           } else {
-            el.disabled = false; 
+            el.disabled = false;
           }
         });
         btnSimpan.style.display = '';
@@ -1156,12 +1294,23 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     function previewFoto(url) {
       Swal.fire({
         imageUrl: url,
-        imageAlt: 'Foto Bukti Pengecekan',
+        imageAlt: 'Foto Bukti',
         showCloseButton: true,
         showConfirmButton: false,
         width: 'auto',
-        maxWidth: '100%',
-        padding: '5px'
+        padding: '1rem',
+        imageWidth: 400,
+        imageHeight: 400,
+        customClass: {
+          image: 'rounded'
+        },
+        didOpen: () => {
+          const img = Swal.getImage();
+          if (img) {
+            img.style.objectFit = 'contain';
+            img.style.backgroundColor = '#f8f9fa';
+          }
+        }
       });
     }
 

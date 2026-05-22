@@ -97,10 +97,10 @@ if (isset($_POST['tambah_item'])) {
     if ($rowExist['is_active'] == 0) {
        // Jika sebelumnya dihapus (soft delete), aktifkan kembali
        mysqli_query($conn, "UPDATE master_item SET is_active=1, label='$label' WHERE id={$rowExist['id']}");
-       header("Location: master_item.php?pesan=tambah_sukses");
+       header("Location: master_item.php?modul=$modul&pesan=tambah_sukses");
        exit;
     } else {
-       header("Location: master_item.php?error=duplikat");
+       header("Location: master_item.php?modul=$modul&error=duplikat");
        exit;
     }
   }
@@ -116,17 +116,18 @@ if (isset($_POST['tambah_item'])) {
       mysqli_query($conn, "ALTER TABLE `$tabelTarget` ADD COLUMN `$kolom` ENUM('Ok','Nok') DEFAULT NULL");
   }
 
-  header("Location: master_item.php?pesan=tambah_sukses");
+  header("Location: master_item.php?modul=$modul&pesan=tambah_sukses");
   exit;
 }
 
 // 4. Handle Hapus Item (Soft Delete)
 if (isset($_GET['hapus'])) {
   $id = (int) $_GET['hapus'];
+  $modulHapus = isset($_GET['modul']) ? $_GET['modul'] : 'apar';
   // Soft delete: ubah is_active = 0
   mysqli_query($conn, "UPDATE master_item SET is_active=0 WHERE id=$id");
   // Perhatikan: Kolom di database TIDAK dihapus permanen sesuai permintaan user
-  header("Location: master_item.php?pesan=hapus_sukses");
+  header("Location: master_item.php?modul=$modulHapus&pesan=hapus_sukses");
   exit;
 }
 
@@ -340,7 +341,7 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
     function confirmDelete(id) {
       Swal.fire({
         title: 'Hapus Item?',
-        text: "Item ini tidak akan tampil lagi di form pengisian (Data lama tetap aman).",
+        text: "Item ini tidak akan tampil lagi di form pengisian.",
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#dc3545',
@@ -361,7 +362,7 @@ $items = mysqli_query($conn, "SELECT * FROM master_item WHERE modul='$modulFilte
       Swal.fire({ icon: 'success', title: 'Berhasil', text: 'Item berhasil diubah', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
     <?php endif; ?>
     <?php if (isset($_GET['pesan']) && $_GET['pesan'] == 'hapus_sukses'): ?>
-      Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Item berhasil disembunyikan', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+      Swal.fire({ icon: 'success', title: 'Terhapus', text: 'Item berhasil terhapus', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
     <?php endif; ?>
     <?php if (isset($_GET['error']) && $_GET['error'] == 'duplikat'): ?>
       Swal.fire({ icon: 'error', title: 'Gagal', text: 'Nama item ini sudah ada.' });

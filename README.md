@@ -69,7 +69,7 @@ Sebelum menjalankan aplikasi ini, pastikan Anda telah menginstal:
 ## ⚙️ Cara Instalasi
 
 1.  **Clone atau Download Project:**
-    Download source code ini dan letakkan di dalam folder server Anda (misal: `C:\xampp\htdocs\checklist`).
+    Download source code ini dan letakkan di dalam folder server Anda (misal: `C:\xampp\htdocs\sarana-prasarana-cba`).
 
 2.  **Persiapan Database:**
     *   Buka **phpMyAdmin**.
@@ -81,7 +81,7 @@ Sebelum menjalankan aplikasi ini, pastikan Anda telah menginstal:
     Buka file `config/koneksi.php` dan sesuaikan pengaturan database Anda.
 
 4.  **Jalankan Aplikasi:**
-    Akses melalui browser di URL: `http://localhost/checklist`
+    Akses melalui browser di URL: `http://localhost/sarana-prasarana-cba`
 
 ## 📖 Dokumentasi Penggunaan
 
@@ -101,7 +101,7 @@ Admin dapat mengakses menu **"Manajemen User"** di navbar dashboard untuk mendaf
 ## 📁 Struktur Folder
 
 ```text
-checklist/
+sarana-prasarana-cba/
 ├── assets/             # Gambar, CSS, dan logo
 ├── config/             # Koneksi database
 ├── uploads/            # Penyimpanan foto bukti pengecekan

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 21, 2026 at 04:45 AM
+-- Generation Time: May 22, 2026 at 10:15 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -134,7 +134,8 @@ INSERT INTO `apar` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
 (122, 'KNR-1', 'APAR 9 KG', 'GEDUNG UTAMA LANTAI 1'),
 (123, 'KNR-2', 'APAR 6 KG', 'GEDUNG UTAMA LANTAI 2'),
 (124, 'KNR-3', 'APAR 3 KG', 'RUANG SERVER'),
-(125, 'KNR-4', 'APAR 9 KG', 'GUDANG UTAMA');
+(125, 'KNR-4', 'APAR 9 KG', 'GUDANG UTAMA'),
+(126, 'test', 'test', 'test');
 
 -- --------------------------------------------------------
 
@@ -160,16 +161,17 @@ CREATE TABLE `checklist_apar` (
   `catatan` text DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
   `users_id` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `hhh` enum('Ok','Nok') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `checklist_apar`
 --
 
-INSERT INTO `checklist_apar` (`id`, `apar_id`, `tahun`, `bulan`, `tanggal_cek`, `label_pengisian`, `tekanan_pressure`, `safety_pin`, `handle`, `selang_nozzle`, `dry_chemical`, `tablulan`, `bambu_petunjuk`, `paraf`, `catatan`, `foto`, `users_id`, `created_at`) VALUES
-(11, 48, 2026, 1, '2026-05-12', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'sadas', 'APAR_48_2026_1_1778554951.png', 2, '2026-05-12 10:02:32'),
-(12, 48, 2026, 2, '2026-05-18', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'dasd', 'dasd', 'APAR_48_2026_2_1779077583.png', 1, '2026-05-18 11:13:04');
+INSERT INTO `checklist_apar` (`id`, `apar_id`, `tahun`, `bulan`, `tanggal_cek`, `label_pengisian`, `tekanan_pressure`, `safety_pin`, `handle`, `selang_nozzle`, `dry_chemical`, `tablulan`, `bambu_petunjuk`, `paraf`, `catatan`, `foto`, `users_id`, `created_at`, `hhh`) VALUES
+(15, 48, 2026, 5, '2026-05-22', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'sadas', 'APAR_48_2026_5_1779431521.png', 11, '2026-05-22 13:32:03', NULL),
+(16, 48, 2026, 6, '2026-05-22', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'bagas', 'sadas', 'APAR_48_2026_6_1779433042.PNG', 10, '2026-05-22 13:57:22', NULL);
 
 -- --------------------------------------------------------
 
@@ -194,7 +196,8 @@ CREATE TABLE `checklist_gedung` (
   `catatan` text DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
   `users_id` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `uuu` enum('Ok','Nok') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -274,8 +277,46 @@ CREATE TABLE `checklist_toilet` (
   `catatan` text DEFAULT NULL,
   `foto` varchar(255) DEFAULT NULL,
   `users_id` int(11) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `created_at` datetime DEFAULT current_timestamp(),
+  `test` enum('Ok','Nok') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `checklist_toilet`
+--
+
+INSERT INTO `checklist_toilet` (`id`, `toilet_id`, `tahun`, `bulan`, `tanggal_cek`, `tissue_toilet`, `lantai_bersih`, `closet_bersih`, `dinding_bersih`, `kran_shower`, `sarang_laba`, `tersedia_pewangi`, `lap_sabun`, `tempat_sampah`, `matikan_lampu`, `paraf`, `catatan`, `foto`, `users_id`, `created_at`, `test`) VALUES
+(36, 1, 2026, 5, '2026-05-02', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Pengecekan pagi, kondisi normal', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(37, 1, 2026, 5, '2026-05-03', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Dinding ada noda, sudah dibersihkan', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(38, 1, 2026, 5, '2026-05-04', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Kondisi baik setelah pembersihan', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(39, 1, 2026, 5, '2026-05-05', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Toilet rapi dan bersih', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(40, 1, 2026, 5, '2026-05-06', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Cek rutin pagi, semua aman', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(41, 1, 2026, 5, '2026-05-07', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Tissue habis pagi, sudah diisi ulang', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(42, 1, 2026, 5, '2026-05-08', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Semua item pengecekan normal', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(43, 1, 2026, 5, '2026-05-09', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Lantai sudah dipel, wangi', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(44, 1, 2026, 5, '2026-05-10', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Ada sarang laba-laba di sudut atas, sudah dibersihkan', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(45, 1, 2026, 5, '2026-05-11', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Kondisi toilet sangat bersih', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(46, 1, 2026, 5, '2026-05-12', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Pengecekan siang, semua baik', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(47, 1, 2026, 5, '2026-05-13', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Sabun dan tissue tersedia cukup', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(48, 1, 2026, 5, '2026-05-14', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Kran bocor sedikit, sudah dilaporkan ke maintenance', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(49, 1, 2026, 5, '2026-05-15', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Kran sudah diperbaiki, kondisi normal', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(50, 1, 2026, 5, '2026-05-16', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Cek rutin, semua dalam kondisi baik', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(51, 1, 2026, 5, '2026-05-17', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Budi', 'Pewangi habis, sudah diganti baru', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(52, 1, 2026, 5, '2026-05-18', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Toilet bersih dan wangi', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(53, 1, 2026, 5, '2026-05-19', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Pengecekan pagi, tidak ada masalah', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(54, 1, 2026, 5, '2026-05-20', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Semua perlengkapan tersedia lengkap', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(55, 1, 2026, 5, '2026-05-21', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Closet bersih, lantai kering', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(56, 1, 2026, 5, '2026-05-22', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Ok', 'Andi', 'Sabun habis, sudah diisi ulang', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(57, 1, 2026, 5, '2026-05-23', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Kondisi baik, tempat sampah sudah dikosongkan', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(58, 1, 2026, 5, '2026-05-24', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Cek sore hari, toilet dalam keadaan rapi', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(59, 1, 2026, 5, '2026-05-25', 'Ok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Lantai agak kotor setelah hujan, sudah dipel', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(60, 1, 2026, 5, '2026-05-26', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Pengecekan normal, semua baik', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(61, 1, 2026, 5, '2026-05-27', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Toilet bersih, pewangi masih cukup', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(62, 1, 2026, 5, '2026-05-28', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Nok', 'Ok', 'Andi', 'Tempat sampah penuh, sudah dikosongkan', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(63, 1, 2026, 5, '2026-05-29', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Semua item OK, kondisi prima', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(64, 1, 2026, 5, '2026-05-30', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Sari', 'Cek akhir bulan, kondisi terjaga baik', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(65, 1, 2026, 5, '2026-05-31', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Andi', 'Pengecekan terakhir bulan Mei, semua baik', 'uploads/sample_toilet.png', 1, '2026-05-21 10:29:49', NULL),
+(101, 13, 2026, 5, '2026-05-19', 'Nok', 'Nok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Ok', 'Budi', 'Kondisi semua baik', 'TOILET_13_20260519_1779419185.png', 8, '2026-05-22 10:06:26', NULL);
 
 -- --------------------------------------------------------
 
@@ -345,7 +386,8 @@ INSERT INTO `gedung` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
 (48, 'GDG-48', 'Gedung', 'I 1 GUDANG BB MP & METHYL'),
 (49, 'GDG-49', 'Gedung', 'I 2 GUDANG KARTON BOX'),
 (50, 'GDG-50', 'Gedung', 'I 3 BB & BJ SPRAYER'),
-(51, 'GDG-51', 'Gedung', 'I 4 BB SPRAYER');
+(51, 'GDG-51', 'Gedung', 'I 4 BB SPRAYER'),
+(55, 'GDG-52', 'Gedung', 'test');
 
 -- --------------------------------------------------------
 
@@ -365,7 +407,8 @@ CREATE TABLE `grease_trap` (
 --
 
 INSERT INTO `grease_trap` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
-(1, 'GT-01', 'Grease Trap', 'Kantin Atas');
+(1, 'GT-01', 'Grease Trap', 'Kantin Atas'),
+(10, 'GT-02', 'Grease Trap', 'test');
 
 -- --------------------------------------------------------
 
@@ -394,7 +437,8 @@ INSERT INTO `hydrant` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
 (7, 'HYD-07', 'Hydrant', 'Area Depan Gedung D5 (Gudang Botol)'),
 (8, 'HYD-08', 'Hydrant', 'Area WTP'),
 (9, 'HYD-09', 'Hydrant', 'Area Mushola Atas'),
-(10, 'HYD-10', 'Hydrant', 'Area Depan Gedung D1 (Prod. Botol)');
+(10, 'HYD-10', 'Hydrant', 'Area Depan Gedung D1 (Prod. Botol)'),
+(11, 'HYD-11', 'Hydrant', 'test');
 
 -- --------------------------------------------------------
 
@@ -442,49 +486,19 @@ INSERT INTO `master_item` (`id`, `modul`, `kolom`, `label`, `is_active`) VALUES
 (25, 'grease_trap', 'pemisahan_lemak', 'Fungsi pemisahan lemak', 1),
 (26, 'grease_trap', 'saluran_in_out', 'Saluran masuk dan keluar', 1),
 (27, 'grease_trap', 'bau_kontaminasi', 'Bau atau kontaminasi', 1),
-(28, 'toilet', 'item1', 'Tissue toilet selalu tersedia', 1),
-(29, 'toilet', 'item2', 'Lantai bersih (tidak ada sampah)', 1),
-(30, 'toilet', 'item3', 'Closet bersih & tidak mampet', 1),
-(31, 'toilet', 'item4', 'Dinding Toilet bersih', 1),
-(32, 'toilet', 'item5', 'Kran/shower berfungsi dengan baik', 1),
-(33, 'toilet', 'item6', 'Tidak ada sarang laba-laba', 1),
-(34, 'toilet', 'item7', 'Tersedia pewangi', 1),
-(35, 'toilet', 'item8', 'Ada lap tangan dan sabun di wastafel', 1),
-(36, 'toilet', 'item9', 'Ada tempat sampah di dalam toilet', 1),
-(37, 'toilet', 'item10', 'Matikan lampu toilet saat tidak digunakan', 1),
-(38, 'toilet', 'test', 'test', 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `toilet_checks`
---
-
-CREATE TABLE `toilet_checks` (
-  `id` int(11) NOT NULL,
-  `tanggal` date NOT NULL,
-  `lokasi` varchar(100) NOT NULL DEFAULT 'Toilet',
-  `item1` tinyint(1) NOT NULL DEFAULT 0,
-  `item2` tinyint(1) NOT NULL DEFAULT 0,
-  `item3` tinyint(1) NOT NULL DEFAULT 0,
-  `item4` tinyint(1) NOT NULL DEFAULT 0,
-  `item5` tinyint(1) NOT NULL DEFAULT 0,
-  `item6` tinyint(1) NOT NULL DEFAULT 0,
-  `item7` tinyint(1) NOT NULL DEFAULT 0,
-  `item8` tinyint(1) NOT NULL DEFAULT 0,
-  `item9` tinyint(1) NOT NULL DEFAULT 0,
-  `item10` tinyint(1) NOT NULL DEFAULT 0,
-  `notes` text DEFAULT NULL,
-  `created_by` varchar(100) DEFAULT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `toilet_checks`
---
-
-INSERT INTO `toilet_checks` (`id`, `tanggal`, `lokasi`, `item1`, `item2`, `item3`, `item4`, `item5`, `item6`, `item7`, `item8`, `item9`, `item10`, `notes`, `created_by`, `created_at`) VALUES
-(1, '2026-05-01', 'Toilet', 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 'sdsasda', 'admin', '2026-05-20 16:26:44');
+(39, 'toilet', 'tissue_toilet', 'Tissue toilet selalu tersedia', 1),
+(40, 'toilet', 'lantai_bersih', 'Lantai bersih (tidak ada sampah)', 1),
+(41, 'toilet', 'closet_bersih', 'Closet bersih & tidak mampet', 1),
+(42, 'toilet', 'dinding_bersih', 'Dinding Toilet bersih', 1),
+(43, 'toilet', 'kran_shower', 'Kran/shower berfungsi dengan baik', 1),
+(44, 'toilet', 'sarang_laba', 'Tidak ada sarang laba-laba', 1),
+(45, 'toilet', 'tersedia_pewangi', 'Tersedia pewangi', 1),
+(46, 'toilet', 'lap_sabun', 'Ada lap tangan dan sabun di washtafel', 1),
+(47, 'toilet', 'tempat_sampah', 'Ada tempat sampah di dalam toilet', 1),
+(48, 'toilet', 'matikan_lampu', 'Matikan lampu toilet saat tidak digunakan', 1),
+(49, 'apar', 'hhh', 'hhh', 0),
+(50, 'gedung', 'uuu', 'uuu', 0),
+(51, 'toilet', 'test', 'test', 0);
 
 -- --------------------------------------------------------
 
@@ -504,7 +518,21 @@ CREATE TABLE `toilet_unit` (
 --
 
 INSERT INTO `toilet_unit` (`id`, `no_kode`, `nama_sarana`, `lokasi`) VALUES
-(1, 'TL-01', 'Toilet', 'Toilet Kantor Baru Lantai 1');
+(1, 'TLT-13', 'Toilet', 'test'),
+(13, 'TLT-1', 'Toilet', 'Toilet kantor utama lantai 1 (Laki-Laki)'),
+(14, 'TLT-2', 'Toilet', 'Toilet kantor utama lantai 2 (Perempuan)'),
+(15, 'TLT-3', 'Toilet', 'Toilet kantor Lab Lantai 1'),
+(16, 'TLT-4', 'Toilet', 'Toilet kantor Lab Lantai 2'),
+(17, 'TLT-5', 'Toilet', 'Toilet Pos Satpam 1'),
+(18, 'TLT-6', 'Toilet', 'Toilet Pos Satpam 2'),
+(19, 'TLT-7', 'Toilet', 'Toilet Kantor MTC lantai 1'),
+(20, 'TLT-8', 'Toilet', 'Toilet Kantor MTC lantai 2'),
+(21, 'TLT-9', 'Toilet', 'Toilet Timbangan'),
+(22, 'TLT-10', 'Toilet', 'Toilet Musholah Atas'),
+(23, 'TLT-11', 'Toilet', 'Toilet Musholah Bawah'),
+(24, 'TLT-12', 'Toilet', 'Toilet Assembling'),
+(25, 'TLT-14', 'Toilet', 'Toilet kantor utama lantai 1 (Perempuan)'),
+(26, 'TLT-15', 'Toilet', 'Toilet kantor utama lantai 2 ( Laki-Laki )');
 
 -- --------------------------------------------------------
 
@@ -519,7 +547,7 @@ CREATE TABLE `users` (
   `nama` varchar(200) DEFAULT NULL,
   `email` varchar(200) DEFAULT NULL,
   `status` enum('Aktif','Non-Aktif') DEFAULT 'Aktif',
-  `role` enum('Admin','User') DEFAULT 'User',
+  `role` enum('Admin','User','superadmin','Monitoring') DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -528,10 +556,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `pass`, `nama`, `email`, `status`, `role`, `created_at`) VALUES
-(1, 'admin', '$2y$10$OmD3oFkOLTeR3ch2rufGneLf3VfpcmmLAAZujf8ZgXiid0fF7UtKa', 'Administrator', 'admin@example.com', 'Aktif', 'Admin', '2026-05-04 10:28:55'),
 (2, 'user', '$2y$10$kosvdiXHU9mhSc2GkNtPTu3p17G63TmtONTgz.n20v4d7TOTGhDq6', 'User Biasa', 'user@example.com', 'Aktif', 'User', '2026-05-04 10:28:55'),
-(5, 'doelkussoy', '$2y$10$m9piukKmAzcMTf01CoEjee4pw9bE0dyT8rBD0uNlEeAgMRklMTNVi', NULL, NULL, 'Aktif', 'User', '2026-05-11 11:26:43'),
-(7, 'itcba', '$2y$10$XdqYZHURrXbx8s671xYtBu/alv5W7RKSPkBhTuVU2NYf0t13YHtnW', NULL, NULL, 'Aktif', 'Admin', '2026-05-11 11:29:32');
+(8, 'itcba', '$2y$10$OnB6kYcyY5sLPokQKwyWJO578IzGCIU2ZrqSJV/bh1H/ywR7mbFwi', NULL, NULL, 'Aktif', 'Admin', '2026-05-21 11:09:46'),
+(9, 'superadmin', '$2y$10$fVIpgBoNpk55E1D3Z2X93OhuWyGiPrnh2KbjvEkwcUMCZyuHglHcC', NULL, NULL, 'Aktif', 'superadmin', '2026-05-21 11:11:05'),
+(10, 'admin', '$2y$10$YQxzOom9riCuEUZfSYb0GuHmz50u7fzFgHFgNsvlIB1vz3To1Z3Hu', NULL, NULL, 'Aktif', 'Admin', '2026-05-22 10:05:35'),
+(15, 'monitoring', '$2y$10$8HTK03TlyXUXOloU3Dz1XuEvgkYPlttk0LwbEZ8EtdSQtFmwchk.S', NULL, NULL, 'Aktif', 'Monitoring', '2026-05-22 14:08:22');
 
 --
 -- Indexes for dumped tables
@@ -599,13 +628,6 @@ ALTER TABLE `master_item`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `toilet_checks`
---
-ALTER TABLE `toilet_checks`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_date_location` (`tanggal`,`lokasi`);
-
---
 -- Indexes for table `toilet_unit`
 --
 ALTER TABLE `toilet_unit`
@@ -626,79 +648,73 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `apar`
 --
 ALTER TABLE `apar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=126;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `checklist_apar`
 --
 ALTER TABLE `checklist_apar`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `checklist_gedung`
 --
 ALTER TABLE `checklist_gedung`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `checklist_grease_trap`
 --
 ALTER TABLE `checklist_grease_trap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `checklist_hydrant`
 --
 ALTER TABLE `checklist_hydrant`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `checklist_toilet`
 --
 ALTER TABLE `checklist_toilet`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `gedung`
 --
 ALTER TABLE `gedung`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `grease_trap`
 --
 ALTER TABLE `grease_trap`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `hydrant`
 --
 ALTER TABLE `hydrant`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `master_item`
 --
 ALTER TABLE `master_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
-
---
--- AUTO_INCREMENT for table `toilet_checks`
---
-ALTER TABLE `toilet_checks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `toilet_unit`
 --
 ALTER TABLE `toilet_unit`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

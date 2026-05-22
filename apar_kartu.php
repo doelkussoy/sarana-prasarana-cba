@@ -38,6 +38,10 @@ if(mysqli_num_rows($resItems) == 0) {
 
 // Handle simpan perawatan
 if (isset($_POST['simpan_checklist'])) {
+if (($_SESSION['role'] ?? '') === 'Monitoring') {
+    header("Location: apar_kartu.php?apar_id=$apar_id&tahun=$tahun");
+    exit;
+}
   $bulan = (int) $_POST['bulan'];
   $tgl = mysqli_real_escape_string($conn, $_POST['tanggal_cek']);
 if (($_SESSION['role'] ?? '') !== 'Admin') {
@@ -154,6 +158,14 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       --blue-light: #3b82f6;
     }
 
+    html,
+    body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden !important;
+      position: relative;
+    }
+
     body {
       background: #f0f2f5;
       font-family: 'Segoe UI', sans-serif;
@@ -225,6 +237,9 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       text-align: left;
       padding-left: 10px;
       white-space: nowrap;
+      position: sticky;
+      left: 0;
+      z-index: 2;
     }
 
     .tbl-kartu .th-bulan {
@@ -296,6 +311,80 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
 
     .form-check-label {
       font-size: 13px;
+    }
+
+    .mobile-scroll-hint {
+      display: none;
+      font-size: 11px;
+      color: var(--blue);
+      margin-bottom: 8px;
+      text-align: right;
+      font-style: italic;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { opacity: 0.5; }
+    }
+
+    @media (max-width: 768px) {
+      .tbl-kartu .th-item {
+        min-width: 120px !important;
+        white-space: normal !important;
+        font-size: 10px !important;
+        padding-left: 5px !important;
+        line-height: 1.2;
+        border-right: 2px solid #1e3a8a !important;
+      }
+      .tbl-kartu th, .tbl-kartu td {
+        padding: 4px 2px !important;
+        font-size: 10px !important;
+      }
+      .tbl-kartu .th-bulan {
+        min-width: 22px !important;
+        font-size: 10px !important;
+        padding: 2px !important;
+      }
+      .mobile-scroll-hint {
+        display: block !important;
+      }
+      .kartu-header {
+        padding: 15px 12px;
+      }
+      .kartu-body {
+        padding: 15px 12px;
+      }
+      .info-box {
+        padding: 10px;
+      }
+      .info-label {
+        font-size: 10px;
+      }
+      .info-val {
+        font-size: 13px;
+      }
+      .top-controls {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+      .top-controls > a.btn {
+        align-self: flex-start;
+      }
+      .top-controls form {
+        width: 100%;
+        margin-left: 0 !important;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+      .top-controls > button {
+        width: 100%;
+        margin-top: 5px;
+      }
+      .modal-box {
+        padding: 20px 15px;
+      }
     }
 
     footer {
@@ -423,10 +512,12 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
       <button class="btn btn-sm btn-success rounded-pill no-print" onclick="window.print()">
         <i class="fa-solid fa-print me-1"></i>Cetak
       </button>
+      <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
       <button class="btn btn-sm rounded-pill no-print" style="background:var(--blue);color:#fff"
         onclick="bukaEdit(new Date().getMonth() + 1)">
         <i class="fa-solid fa-plus me-1"></i>Isi Perawatan
       </button>
+      <?php endif; ?>
     </div>
 
     <!-- Kartu Riwayat -->
@@ -465,6 +556,9 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
         </div>
 
         <!-- Tabel Perawatan -->
+        <div class="mobile-scroll-hint">
+          <i class="fa-solid fa-arrows-left-right me-1"></i> Geser tabel ke kanan untuk melihat bulan lainnya
+        </div>
         <div class="table-responsive">
           <table class="tbl-kartu">
             <thead>
@@ -546,7 +640,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
               <div class="col-6 col-md-3 col-lg-2">
                 <div class="d-flex gap-2 align-items-start">
                   <span class="fw-semibold small" style="min-width:28px"><?= $nm ?> :</span>
-                  <span class="small text-secondary" style="border-bottom:1px solid #ccc;flex:1;min-height:20px">
+                  <span class="small text-secondary" style="border-bottom:1px solid #ccc;flex:1;min-height:20px;word-break:break-word;overflow-wrap:break-word;">
                     <?= $cat ? htmlspecialchars($cat) : '' ?>
                   </span>
                 </div>
@@ -555,6 +649,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
           </div>
         </div>
 
+        <?php if (($_SESSION['role'] ?? '') !== 'Monitoring'): ?>
         <!-- Tombol Aksi per Bulan -->
         <div class="mt-3 no-print">
           <div class="fw-semibold mb-2 text-secondary small">Kelola Perawatan per Bulan:</div>
@@ -568,6 +663,7 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
             <?php endfor; ?>
           </div>
         </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
@@ -862,11 +958,23 @@ $editData = $editBulan && isset($rows[$editBulan]) ? $rows[$editBulan] : null;
     function previewFoto(url) {
       Swal.fire({
         imageUrl: url,
-        imageAlt: 'Foto Bukti Pengecekan',
+        imageAlt: 'Foto Bukti',
         showCloseButton: true,
         showConfirmButton: false,
         width: 'auto',
-        padding: '0px'
+        padding: '1rem',
+        imageWidth: 400,
+        imageHeight: 400,
+        customClass: {
+          image: 'rounded'
+        },
+        didOpen: () => {
+          const img = Swal.getImage();
+          if (img) {
+            img.style.objectFit = 'contain';
+            img.style.backgroundColor = '#f8f9fa';
+          }
+        }
       });
     }
 
